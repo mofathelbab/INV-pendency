@@ -238,11 +238,12 @@ details.setup ol{margin:10px 0 4px;padding-left:20px;display:grid;gap:6px}
   </div>
 
   <section class="kpis" id="kpis">
-    <div class="kpi" style="--k:var(--y)"><span class="lbl">Open jobs</span><span class="big" data-k="jobs">—</span></div>
-    <div class="kpi" style="--k:var(--b)"><span class="lbl">Items remaining</span><span class="big" data-k="items">—</span></div>
-    <div class="kpi" style="--k:var(--o)"><span class="lbl">Pending (not started)</span><span class="big" data-k="pending">—</span></div>
-    <div class="kpi" style="--k:var(--g)"><span class="lbl">Opened (in progress)</span><span class="big" data-k="opened">—</span></div>
-    <div class="kpi" style="--k:var(--r)"><span class="lbl">Older than 2 days</span><span class="big" data-k="d2">—</span></div>
+    <div class="kpi" style="--k:var(--y)"><span class="lbl">Remaining qty</span><span class="big" data-k="items">—</span></div>
+    <div class="kpi" style="--k:var(--g)"><span class="lbl">Completed qty</span><span class="big" data-k="doneQty">—</span></div>
+    <div class="kpi" style="--k:var(--o)"><span class="lbl">Pending qty (not started)</span><span class="big" data-k="pendingQty">—</span></div>
+    <div class="kpi" style="--k:var(--a)"><span class="lbl">Opened qty (in progress)</span><span class="big" data-k="openedQty">—</span></div>
+    <div class="kpi" style="--k:var(--r)"><span class="lbl">Qty older than 2 days</span><span class="big" data-k="d2Qty">—</span></div>
+    <div class="kpi" style="--k:var(--b)"><span class="lbl">Open jobs</span><span class="big" data-k="jobs">—</span></div>
     <div class="kpi" style="--k:var(--p)"><span class="lbl">Oldest (days)</span><span class="big" data-k="oldest">—</span></div>
   </section>
 
@@ -257,7 +258,7 @@ details.setup ol{margin:10px 0 4px;padding-left:20px;display:grid;gap:6px}
     <section class="panel" id="types">
       <div class="ph">
         <div class="ico" style="--ic:rgba(96,165,250,.14);--icc:var(--b)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 6h12M4 12h16M4 18h8"/></svg></div>
-        <div><h2 class="h">By process type</h2></div>
+        <div><h2 class="h">Remaining and completed qty by process type</h2></div>
       </div>
       <div class="chart" id="typeChart"></div>
     </section>
@@ -266,7 +267,7 @@ details.setup ol{margin:10px 0 4px;padding-left:20px;display:grid;gap:6px}
   <section class="panel" id="daily">
     <div class="ph">
       <div class="ico" style="--ic:rgba(52,211,153,.14);--icc:var(--g)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg></div>
-      <div><h2 class="h">Still open, by creation day</h2></div>
+      <div><h2 class="h">Remaining qty, by creation day</h2></div>
     </div>
     <div class="chart" id="dayChart"></div>
   </section>
@@ -284,8 +285,8 @@ details.setup ol{margin:10px 0 4px;padding-left:20px;display:grid;gap:6px}
           <th class="hide-sm"><button type="button" data-sort="cont">Container</button></th>
           <th><button type="button" data-sort="ptype">Process type</button></th>
           <th><button type="button" data-sort="status">Status</button></th>
-          <th class="num"><button type="button" data-sort="rem">Items left</button></th>
-          <th class="num hide-sm"><button type="button" data-sort="done">Done</button></th>
+          <th class="num"><button type="button" data-sort="rem">Remaining qty</button></th>
+          <th class="num"><button type="button" data-sort="done">Completed qty</button></th>
           <th class="hide-sm"><button type="button" data-sort="food">Food</button></th>
           <th class="hide-sm"><button type="button" data-sort="asn">ASN</button></th>
           <th class="hide-sm"><button type="button" data-sort="user">User</button></th>
@@ -375,7 +376,7 @@ const CHECK_EVERY_SECONDS = 60;
     rows.sort((a, b) => { const va = a[st.sortKey], vb = b[st.sortKey]; const c = typeof va === 'number' ? va - vb : String(va).localeCompare(String(vb)); return c * st.sortDir || b.age - a.age; });
     return rows;
   }
-  const kpisOf = (r) => ({ jobs: r.length, items: d3.sum(r, (l) => l.rem), pending: r.filter((l) => l.status === 'pending').length, opened: r.filter((l) => l.status === 'opened').length, d2: r.filter((l) => l.age >= 2).length, oldest: r.length ? d3.max(r, (l) => l.age) : 0, today: r.filter((l) => l.isToday).length });
+  const kpisOf = (r) => ({ jobs: r.length, items: d3.sum(r, (l) => l.rem), doneQty: d3.sum(r, (l) => l.done), pendingQty: d3.sum(r.filter((l) => l.status === 'pending'), (l) => l.rem), openedQty: d3.sum(r.filter((l) => l.status === 'opened'), (l) => l.rem), d2Qty: d3.sum(r.filter((l) => l.age >= 2), (l) => l.rem), pending: r.filter((l) => l.status === 'pending').length, opened: r.filter((l) => l.status === 'opened').length, d2: r.filter((l) => l.age >= 2).length, oldest: r.length ? d3.max(r, (l) => l.age) : 0, today: r.filter((l) => l.isToday).length });
   const selList = () => WAREHOUSES.filter((w) => st.whs.has(w));
   const scopeName = () => (st.whs.size ? selList().join(', ') : 'All warehouses');
   const scopeFile = () => (st.whs.size ? selList().join('+') : 'All');
@@ -397,32 +398,32 @@ const CHECK_EVERY_SECONDS = 60;
     $('#cards').replaceChildren(...WAREHOUSES.map((wh) => {
       const rows = all.filter((l) => l.wh === wh); const k = kpisOf(rows);
       const b = el('button', 'card'); b.type = 'button'; b.dataset.wh = wh; b.setAttribute('aria-pressed', String(st.whs.has(wh)));
-      const top = el('div', 'card-top'); const sk = el('span', 'skus'); sk.append(el('b', '', F(k.items)), ' items left'); top.append(el('span', 'wh', wh), sk);
+      const top = el('div', 'card-top'); const sk = el('span', 'skus'); sk.append(el('b', '', F(k.jobs)), k.jobs === 1 ? ' job' : ' jobs'); top.append(el('span', 'wh', wh), sk);
       const bar = el('div', 'bar');
-      AG.forEach((a) => { const n = rows.filter((l) => l.ab === a.k).length; const i = el('i'); i.style.width = (100 * n / (rows.length || 1)) + '%'; i.style.background = a.c; bar.append(i); });
+      AG.forEach((a) => { const n = d3.sum(rows.filter((l) => l.ab === a.k), (l) => l.rem); const i = el('i'); i.style.width = (100 * n / (k.items || 1)) + '%'; i.style.background = a.c; bar.append(i); });
       const mini = el('div', 'mini');
       const part = (v, label, bad) => { const sp = el('span', bad ? 'bad' : ''); sp.append(el('b', '', F(v)), ' ' + label); return sp; };
-      mini.append(part(k.pending, 'pending'), part(k.opened, 'opened'), part(k.oldest, 'days oldest', k.oldest > 2));
-      b.append(top, el('div', 'big', F(k.jobs)), el('div', 'lbl', 'Open jobs'), bar, mini);
+      mini.append(part(k.doneQty, 'completed'), part(k.pendingQty, 'pending'), part(k.openedQty, 'opened'), part(k.oldest, 'days oldest', k.oldest > 2));
+      b.append(top, el('div', 'big', F(k.items)), el('div', 'lbl', 'Remaining qty'), bar, mini);
       return b;
     }));
   }
   function drawChips() {
-    const all = baseView('wh'); const cnt = d3.rollup(all, (v) => v.length, (l) => l.wh);
+    const all = baseView('wh'); const cnt = d3.rollup(all, (v) => d3.sum(v, (l) => l.rem), (l) => l.wh);
     const mk = (w, label, n) => { const b = el('button', 'chip', label); b.append(el('span', 'n', F(n))); b.type = 'button'; b.dataset.wh = w; b.setAttribute('aria-pressed', String(w === 'All' ? !st.whs.size : st.whs.has(w))); return b; };
-    $('#chips').replaceChildren(mk('All', 'All warehouses', all.length), ...WAREHOUSES.map((w) => mk(w, w, cnt.get(w) || 0)));
+    $('#chips').replaceChildren(mk('All', 'All warehouses', d3.sum(all, (l) => l.rem)), ...WAREHOUSES.map((w) => mk(w, w, cnt.get(w) || 0)));
   }
   function drawKpis() { const k = kpisOf(baseView()); document.querySelectorAll('#kpis [data-k]').forEach((e) => { e.textContent = RAW ? F(k[e.dataset.k]) : '—'; }); }
   function drawAge() {
     const rows = baseView('age'); const tot = rows.length || 1;
-    const data = AG.map((a) => { const r = rows.filter((l) => l.ab === a.k); return { ...a, n: r.length, items: d3.sum(r, (l) => l.rem) }; });
-    const max = d3.max(data, (d) => d.n) || 1; const P = d3.format('.1%');
-    const head = el('div', 'exhead'); head.append(el('span', '', 'Open for'), el('span', '', ''), el('span', '', 'Jobs'), el('span', '', 'Share'), el('span', '', 'Items left'));
+    const data = AG.map((a) => { const r = rows.filter((l) => l.ab === a.k); return { ...a, n: d3.sum(r, (l) => l.rem), items: r.length }; });
+    const max = d3.max(data, (d) => d.n) || 1; const P = d3.format('.1%'); const totQ = d3.sum(data, (d) => d.n) || 1;
+    const head = el('div', 'exhead'); head.append(el('span', '', 'Open for'), el('span', '', ''), el('span', '', 'Qty'), el('span', '', 'Share'), el('span', '', 'Jobs'));
     $('#ageChart').replaceChildren(head, ...data.map((d) => {
       const b = el('button', 'exrow'); b.type = 'button'; b.dataset.age = d.k; b.setAttribute('aria-pressed', String(st.age === d.k));
       const l = el('span', 'exl'); const dot = el('i'); dot.style.background = d.c; l.append(dot, d.l);
       const tr = el('span', 'extrack'); const f = el('i'); f.style.width = (100 * d.n / max) + '%'; f.style.background = d.c; if (!d.n) f.style.minWidth = '0'; tr.append(f);
-      b.append(l, tr, el('span', 'exq', F(d.n)), el('span', 'exp', d.n ? P(d.n / tot) : '–'), el('span', 'exs', F(d.items)));
+      b.append(l, tr, el('span', 'exq', F(d.n)), el('span', 'exp', d.n ? P(d.n / totQ) : '–'), el('span', 'exs', F(d.items)));
       return b;
     }));
   }
@@ -430,9 +431,9 @@ const CHECK_EVERY_SECONDS = 60;
   const showTip = (box, t, e, head, body) => { t.replaceChildren(el('span', '', head), el('b', '', body)); t.hidden = false; const r = box.getBoundingClientRect(); let x = e.clientX - r.left + 12; const tw = t.offsetWidth; if (x + tw > r.width) x = Math.max(0, e.clientX - r.left - tw - 12); t.style.left = x + 'px'; t.style.top = Math.max(0, e.clientY - r.top - 10) + 'px'; };
   function drawTypes() {
     const box = $('#typeChart'); box.replaceChildren();
-    const rows = d3.rollups(baseView('ptype'), (v) => [v.length, d3.sum(v, (l) => l.rem)], (l) => l.ptype).sort((a, b) => b[1][0] - a[1][0]);
+    const rows = d3.rollups(baseView('ptype'), (v) => [d3.sum(v, (l) => l.rem), v.length, d3.sum(v, (l) => l.done)], (l) => l.ptype).sort((a, b) => b[1][0] - a[1][0]);
     if (!rows.length) { box.append(el('div', 'msg', RAW ? 'No jobs for these filters.' : 'No data yet.')); return; }
-    const W = Math.max(280, box.clientWidth), rowH = 28, Hh = rows.length * rowH + 6, L0 = 140, R = 110;
+    const W = Math.max(280, box.clientWidth), rowH = 28, Hh = rows.length * rowH + 6, L0 = 140, R = 150;
     const svg = d3.select(box).append('svg').attr('width', '100%').attr('viewBox', `0 0 ${W} ${Hh}`).attr('height', Hh).attr('role', 'img').attr('aria-label', 'Open jobs by process type');
     const x = d3.scaleLinear([0, d3.max(rows, (r) => r[1][0])], [0, Math.max(10, W - L0 - R)]);
     const t = tipFor(box);
@@ -441,13 +442,13 @@ const CHECK_EVERY_SECONDS = 60;
     g.append('text').attr('x', L0 - 10).attr('y', rowH / 2 - 1).attr('dy', '.35em').attr('text-anchor', 'end').attr('font-size', 12).style('fill', (d) => (d[0] === st.ptype ? 'var(--y)' : 'var(--muted)')).text((d) => d[0]);
     g.append('rect').attr('x', L0).attr('y', 5).attr('height', rowH - 11).attr('rx', 4).attr('width', (d) => Math.max(2, x(d[1][0])))
       .style('fill', (d, i) => (d[0] === st.ptype || (st.ptype === 'All' && i === 0) ? 'var(--y)' : 'var(--b)'))
-      .on('mousemove', (e, d) => showTip(box, t, e, d[0], F(d[1][0]) + ' jobs · ' + F(d[1][1]) + ' items')).on('mouseleave', () => { t.hidden = true; });
-    g.append('text').attr('x', (d) => L0 + Math.max(2, x(d[1][0])) + 6).attr('y', rowH / 2 - 1).attr('dy', '.35em').attr('font-size', 12).attr('font-weight', 700).style('fill', 'var(--fg)').text((d) => F(d[1][0]) + ' · ' + F(d[1][1]) + ' items');
+      .on('mousemove', (e, d) => showTip(box, t, e, d[0], F(d[1][0]) + ' remaining · ' + F(d[1][2]) + ' completed · ' + F(d[1][1]) + ' jobs')).on('mouseleave', () => { t.hidden = true; });
+    g.append('text').attr('x', (d) => L0 + Math.max(2, x(d[1][0])) + 6).attr('y', rowH / 2 - 1).attr('dy', '.35em').attr('font-size', 12).attr('font-weight', 700).style('fill', 'var(--fg)').text((d) => F(d[1][0]) + ' left · ' + F(d[1][2]) + ' done');
   }
   function drawDays() {
     const box = $('#dayChart'); box.replaceChildren();
     const days = []; for (let i = 29; i >= 0; i--) { const d = new Date(); d.setDate(d.getDate() - i); days.push(iso(d)); }
-    const cnt = d3.rollup(baseView(), (v) => v.length, (l) => l.day);
+    const cnt = d3.rollup(baseView(), (v) => d3.sum(v, (l) => l.rem), (l) => l.day);
     const data = days.map((d) => [d, cnt.get(d) || 0]);
     const W = Math.max(300, box.clientWidth), Hh = 190, m = { t: 18, r: 8, b: 26, l: 8 };
     const x = d3.scaleBand(days, [m.l, W - m.r]).padding(0.18);
@@ -455,8 +456,8 @@ const CHECK_EVERY_SECONDS = 60;
     const svg = d3.select(box).append('svg').attr('width', '100%').attr('viewBox', `0 0 ${W} ${Hh}`).attr('height', Hh).attr('role', 'img').attr('aria-label', 'Open jobs by creation day');
     const t = tipFor(box);
     svg.selectAll('rect').data(data).join('rect').attr('x', (d) => x(d[0])).attr('width', x.bandwidth()).attr('y', (d) => y(d[1])).attr('height', (d) => y(0) - y(d[1])).attr('rx', 3)
-      .style('fill', (d) => (d[0] === days[29] ? 'var(--g)' : 'var(--b)')).on('mousemove', (e, d) => showTip(box, t, e, d[0], F(d[1]) + ' jobs')).on('mouseleave', () => { t.hidden = true; });
-    svg.selectAll('text.v').data(data.filter((d) => d[1])).join('text').attr('class', 'v').attr('x', (d) => x(d[0]) + x.bandwidth() / 2).attr('y', (d) => y(d[1]) - 4).attr('text-anchor', 'middle').attr('font-size', 10).style('fill', 'var(--muted)').text((d) => (x.bandwidth() > 16 ? d[1] : ''));
+      .style('fill', (d) => (d[0] === days[29] ? 'var(--g)' : 'var(--b)')).on('mousemove', (e, d) => showTip(box, t, e, d[0], F(d[1]) + ' qty')).on('mouseleave', () => { t.hidden = true; });
+    svg.selectAll('text.v').data(data.filter((d) => d[1])).join('text').attr('class', 'v').attr('x', (d) => x(d[0]) + x.bandwidth() / 2).attr('y', (d) => y(d[1]) - 4).attr('text-anchor', 'middle').attr('font-size', 10).style('fill', 'var(--muted)').text((d) => (x.bandwidth() > 22 ? d3.format('~s')(d[1]) : ''));
     const step = Math.ceil(30 / Math.max(1, Math.floor(W / 60)));
     svg.selectAll('text.d').data(days.filter((d, i) => (29 - i) % step === 0)).join('text').attr('class', 'd').attr('x', (d) => x(d) + x.bandwidth() / 2).attr('y', Hh - 8).attr('text-anchor', 'middle').attr('font-size', 10.5).style('fill', 'var(--muted)').text((d) => d.slice(5));
   }
@@ -467,18 +468,18 @@ const CHECK_EVERY_SECONDS = 60;
     rows.slice(0, lim).forEach((l) => {
       const tr = el('tr', l.age > 7 ? 'age-r' : l.age >= 2 ? 'age-o' : ''); const td = (c, v) => tr.append(el('td', c, v));
       td('c-wh colwh', l.wh); td('c-sku', l.job); td('c-loc hide-sm', l.cont); td('c-fam', l.ptype); td('c-fam', l.status);
-      td('num', F(l.rem)); td('num hide-sm', F(l.done)); td('c-fam hide-sm', l.food ? 'Food' : 'Non-food'); td('c-fam hide-sm', l.asn || '—'); td('c-fam hide-sm', l.user || '—');
+      td('num', F(l.rem)); td('num', F(l.done)); td('c-fam hide-sm', l.food ? 'Food' : 'Non-food'); td('c-fam hide-sm', l.asn || '—'); td('c-fam hide-sm', l.user || '—');
       td('c-date', l.created.slice(0, 16)); td('num age', F(l.age));
       frag.append(tr);
     });
     $('#tbody').replaceChildren(frag);
-    $('#count').textContent = rows.length ? `Showing ${F(Math.min(lim, rows.length))} of ${F(rows.length)} jobs · ${F(d3.sum(rows, (l) => l.rem))} items left` : RAW ? 'No jobs match these filters.' : (emptyMsg ? 'No data yet.' : 'Loading…');
+    $('#count').textContent = rows.length ? `Showing ${F(Math.min(lim, rows.length))} of ${F(rows.length)} jobs · ${F(d3.sum(rows, (l) => l.rem))} remaining · ${F(d3.sum(rows, (l) => l.done))} completed` : RAW ? 'No jobs match these filters.' : (emptyMsg ? 'No data yet.' : 'Loading…');
     $('#more').hidden = rows.length <= lim;
   }
 
   // exports: selected warehouses, or all when none is selected
   const stamp = () => iso(new Date()) + '_' + new Date().toTimeString().slice(0, 5).replace(':', '');
-  const jobsOut = () => jobView().map((l) => ({ Warehouse: l.wh, Job: l.job, Container: l.cont, 'Process type': l.ptype, 'Grouping key': l.grp, Status: l.status, 'Items remaining': l.rem, 'Items completed': l.done, Food: l.food ? 'Food' : 'Non-food', ASN: l.asn, User: l.user, 'Source pack warehouse': l.src, Created: l.created, Opened: l.opened, 'Age (days)': l.age, 'Open for': AGL[l.ab] }));
+  const jobsOut = () => jobView().map((l) => ({ Warehouse: l.wh, Job: l.job, Container: l.cont, 'Process type': l.ptype, 'Grouping key': l.grp, Status: l.status, 'Remaining qty': l.rem, 'Completed qty': l.done, Food: l.food ? 'Food' : 'Non-food', ASN: l.asn, User: l.user, 'Source pack warehouse': l.src, Created: l.created, Opened: l.opened, 'Age (days)': l.age, 'Open for': AGL[l.ab] }));
   function toCSV(rows) { if (!rows.length) return ''; const cols = Object.keys(rows[0]); const esc = (v) => { const s = v == null ? '' : String(v); return /[",\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s; }; return '\uFEFF' + [cols.join(','), ...rows.map((r) => cols.map((c) => esc(r[c])).join(','))].join('\n'); }
   function download(blob, name) { const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = name; document.body.append(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 1000); }
   $('#exCsv').addEventListener('click', () => { if (!RAW) { alert('No data loaded yet.'); return; } const r = jobsOut(); if (!r.length) { alert('No jobs match these filters.'); return; } download(new Blob([toCSV(r)], { type: 'text/csv;charset=utf-8' }), `Putaway_open_${scopeFile()}_${stamp()}.csv`); });
@@ -490,11 +491,11 @@ const CHECK_EVERY_SECONDS = 60;
     const info = XLSX.utils.aoa_to_sheet([['CAIID Open Putaway export'], [], ['Warehouses', scopeName()], ['Created from', st.from || 'Start'], ['Created to', st.to || 'Today'], ['Status', st.status], ['Process type', st.ptype], ['Food', st.food === 'All' ? 'All' : st.food === '1' ? 'Food' : 'Non-food'], ['Age filter', st.age ? AGL[st.age] : 'All'], ['Search', st.q.trim() || '—'], ['Data updated', updatedLabel], ['Exported', new Date().toLocaleString()]]);
     info['!cols'] = [{ wch: 16 }, { wch: 50 }]; XLSX.utils.book_append_sheet(wb, info, 'Info');
     const whs = st.whs.size ? selList() : WAREHOUSES; const base = baseView();
-    const sum = whs.map((w) => { const k = kpisOf(base.filter((l) => l.wh === w)); return { Warehouse: w, 'Open jobs': k.jobs, 'Items remaining': k.items, Pending: k.pending, Opened: k.opened, 'Older than 2 days': k.d2, 'Oldest (days)': k.oldest }; });
-    if (whs.length > 1) { const k = kpisOf(base); sum.push({ Warehouse: 'Total', 'Open jobs': k.jobs, 'Items remaining': k.items, Pending: k.pending, Opened: k.opened, 'Older than 2 days': k.d2, 'Oldest (days)': k.oldest }); }
+    const sum = whs.map((w) => { const k = kpisOf(base.filter((l) => l.wh === w)); return { Warehouse: w, 'Remaining qty': k.items, 'Completed qty': k.doneQty, 'Pending qty': k.pendingQty, 'Opened qty': k.openedQty, 'Qty older than 2 days': k.d2Qty, 'Open jobs': k.jobs, 'Oldest (days)': k.oldest }; });
+    if (whs.length > 1) { const k = kpisOf(base); sum.push({ Warehouse: 'Total', 'Remaining qty': k.items, 'Completed qty': k.doneQty, 'Pending qty': k.pendingQty, 'Opened qty': k.openedQty, 'Qty older than 2 days': k.d2Qty, 'Open jobs': k.jobs, 'Oldest (days)': k.oldest }); }
     add('Warehouses', sum);
-    add('Process types', d3.rollups(base, (v) => [v.length, d3.sum(v, (l) => l.rem)], (l) => l.ptype).sort((a, b) => b[1][0] - a[1][0]).map(([p, [n, it]]) => ({ 'Process type': p, Jobs: n, 'Items remaining': it })));
-    const ab = baseView('age'); add('Aging', AG.map((a) => ({ 'Open for': a.l, Jobs: ab.filter((l) => l.ab === a.k).length })));
+    add('Process types', d3.rollups(base, (v) => [v.length, d3.sum(v, (l) => l.rem), d3.sum(v, (l) => l.done)], (l) => l.ptype).sort((a, b) => b[1][1] - a[1][1]).map(([p, [n, it, dn]]) => ({ 'Process type': p, 'Remaining qty': it, 'Completed qty': dn, Jobs: n })));
+    const ab = baseView('age'); add('Aging', AG.map((a) => ({ 'Open for': a.l, 'Remaining qty': d3.sum(ab.filter((l) => l.ab === a.k), (l) => l.rem), 'Completed qty': d3.sum(ab.filter((l) => l.ab === a.k), (l) => l.done), Jobs: ab.filter((l) => l.ab === a.k).length })));
     add('Jobs', jobsOut());
     XLSX.writeFile(wb, `Putaway_open_${scopeFile()}_${stamp()}.xlsx`);
   });
