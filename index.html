@@ -376,7 +376,7 @@ const CHECK_EVERY_SECONDS = 60;
     rows.sort((a, b) => { const va = a[st.sortKey], vb = b[st.sortKey]; const c = typeof va === 'number' ? va - vb : String(va).localeCompare(String(vb)); return c * st.sortDir || b.age - a.age; });
     return rows;
   }
-  const kpisOf = (r) => ({ jobs: r.length, items: d3.sum(r, (l) => l.rem), doneQty: d3.sum(r, (l) => l.done), pendingQty: d3.sum(r.filter((l) => l.status === 'pending'), (l) => l.rem), openedQty: d3.sum(r.filter((l) => l.status === 'opened'), (l) => l.rem), d2Qty: d3.sum(r.filter((l) => l.age >= 2), (l) => l.rem), pending: r.filter((l) => l.status === 'pending').length, opened: r.filter((l) => l.status === 'opened').length, d2: r.filter((l) => l.age >= 2).length, oldest: r.length ? d3.max(r, (l) => l.age) : 0, today: r.filter((l) => l.isToday).length });
+  const kpisOf = (r) => ({ jobs: r.length, items: d3.sum(r, (l) => l.rem), doneQty: d3.sum(r, (l) => l.done), pendingQty: d3.sum(r.filter((l) => l.status === 'pending'), (l) => l.rem), openedQty: d3.sum(r.filter((l) => l.status === 'opened'), (l) => l.rem), d2Qty: d3.sum(r.filter((l) => l.age > 2), (l) => l.rem), pending: r.filter((l) => l.status === 'pending').length, opened: r.filter((l) => l.status === 'opened').length, d2: r.filter((l) => l.age > 2).length, oldest: r.length ? d3.max(r, (l) => l.age) : 0, today: r.filter((l) => l.isToday).length });
   const selList = () => WAREHOUSES.filter((w) => st.whs.has(w));
   const scopeName = () => (st.whs.size ? selList().join(', ') : 'All warehouses');
   const scopeFile = () => (st.whs.size ? selList().join('+') : 'All');
@@ -431,7 +431,7 @@ const CHECK_EVERY_SECONDS = 60;
   const showTip = (box, t, e, head, body) => { t.replaceChildren(el('span', '', head), el('b', '', body)); t.hidden = false; const r = box.getBoundingClientRect(); let x = e.clientX - r.left + 12; const tw = t.offsetWidth; if (x + tw > r.width) x = Math.max(0, e.clientX - r.left - tw - 12); t.style.left = x + 'px'; t.style.top = Math.max(0, e.clientY - r.top - 10) + 'px'; };
   function drawTypes() {
     const box = $('#typeChart'); box.replaceChildren();
-    const rows = d3.rollups(baseView('ptype'), (v) => [d3.sum(v, (l) => l.rem), v.length, d3.sum(v, (l) => l.done)], (l) => l.ptype).sort((a, b) => b[1][0] - a[1][0]);
+    const rows = d3.rollups(baseView(), (v) => [d3.sum(v, (l) => l.rem), v.length, d3.sum(v, (l) => l.done)], (l) => l.ptype).sort((a, b) => b[1][0] - a[1][0]);
     if (!rows.length) { box.append(el('div', 'msg', RAW ? 'No jobs for these filters.' : 'No data yet.')); return; }
     const W = Math.max(280, box.clientWidth), rowH = 28, Hh = rows.length * rowH + 6, L0 = 140, R = 150;
     const svg = d3.select(box).append('svg').attr('width', '100%').attr('viewBox', `0 0 ${W} ${Hh}`).attr('height', Hh).attr('role', 'img').attr('aria-label', 'Open jobs by process type');
@@ -466,7 +466,7 @@ const CHECK_EVERY_SECONDS = 60;
     document.querySelectorAll('#tbl th').forEach((th) => { const k = th.querySelector('button').dataset.sort; if (k === st.sortKey) th.setAttribute('aria-sort', st.sortDir > 0 ? 'ascending' : 'descending'); else th.removeAttribute('aria-sort'); });
     const rows = jobView(); const lim = st.shown; const frag = document.createDocumentFragment();
     rows.slice(0, lim).forEach((l) => {
-      const tr = el('tr', l.age > 7 ? 'age-r' : l.age >= 2 ? 'age-o' : ''); const td = (c, v) => tr.append(el('td', c, v));
+      const tr = el('tr', l.age > 7 ? 'age-r' : l.age > 2 ? 'age-o' : ''); const td = (c, v) => tr.append(el('td', c, v));
       td('c-wh colwh', l.wh); td('c-sku', l.job); td('c-loc hide-sm', l.cont); td('c-fam', l.ptype); td('c-fam', l.status);
       td('num', F(l.rem)); td('num', F(l.done)); td('c-fam hide-sm', l.food ? 'Food' : 'Non-food'); td('c-fam hide-sm', l.asn || '—'); td('c-fam hide-sm', l.user || '—');
       td('c-date', l.created.slice(0, 16)); td('num age', F(l.age));
