@@ -177,6 +177,11 @@ details.setup ol{margin:10px 0 4px;padding-left:20px;display:grid;gap:6px}
 .bmk{display:inline-block;background:var(--y);color:var(--yink);font-weight:800;padding:7px 12px;border-radius:999px;text-decoration:none;cursor:grab}
 
 .sel{display:flex;gap:8px;flex-wrap:wrap}
+.modes{display:inline-flex;gap:4px;background:var(--panel2);border:1px solid var(--line);border-radius:999px;padding:4px;margin-top:12px}
+.mode{appearance:none;font:inherit;font-weight:800;font-size:14px;color:var(--muted);background:none;border:0;border-radius:999px;padding:8px 16px;cursor:pointer}
+.mode[aria-pressed="true"]{background:var(--y);color:var(--yink)}
+body.mode-res .pv{display:none!important}
+body:not(.mode-res) .rv{display:none!important}
 </style>
 </head>
 <body>
@@ -194,7 +199,8 @@ details.setup ol{margin:10px 0 4px;padding-left:20px;display:grid;gap:6px}
     </div>
   </div>
   <nav class="nav" aria-label="Sections">
-    <a href="#warehouses">Overview</a><a href="#aging">Aging</a><a href="#types">Process types</a><a href="#daily">By day</a><a href="#jobsec">Jobs</a>
+    <a class="pv" href="#warehouses">Overview</a><a class="pv" href="#aging">Aging</a><a class="pv" href="#types">Process types</a><a class="pv" href="#daily">By day</a><a class="pv" href="#jobsec">Jobs</a>
+    <a class="rv" href="#r-warehouses">Overview</a><a class="rv" href="#r-aging">Aging</a><a class="rv" href="#r-reasons">Reasons</a><a class="rv" href="#r-sec">Reservations</a>
   </nav>
 </header>
 
@@ -203,9 +209,13 @@ details.setup ol{margin:10px 0 4px;padding-left:20px;display:grid;gap:6px}
     <p class="eyebrow">Putaway</p>
     <h1 class="h1">Pendency over <span class="y">activities</span></h1>
     <p class="note">Showing <b id="selName" style="color:var(--y)">All warehouses</b><span id="flt"></span></p>
+    <div class="modes" role="group" aria-label="View">
+      <button class="mode" type="button" data-mode="pend" aria-pressed="true">Pendencies</button>
+      <button class="mode" type="button" data-mode="res" aria-pressed="false">Reservations</button>
+    </div>
   </div>
 
-  <section class="sec" id="warehouses">
+  <section class="sec pv" id="warehouses">
     <div><h2 class="h">Warehouse overview</h2></div>
     <div class="cards" id="cards"></div>
   </section>
@@ -222,12 +232,15 @@ details.setup ol{margin:10px 0 4px;padding-left:20px;display:grid;gap:6px}
       <button class="chip" type="button" data-dr="7">7 days</button>
       <button class="chip" type="button" data-dr="30">30 days</button>
     </div>
-    <div class="sel">
+    <div class="sel pv">
       <select class="in" id="status" aria-label="Status"><option value="All">All statuses</option></select>
       <select class="in" id="ptype" aria-label="Process type"><option value="All">All process types</option></select>
       <select class="in" id="food" aria-label="Food"><option value="All">Food + non-food</option><option value="1">Food only</option><option value="0">Non-food only</option></select>
     </div>
-    <input class="in search" id="q" type="search" placeholder="Search job, container, ASN or user" aria-label="Search">
+    <div class="sel rv">
+      <select class="in" id="reason" aria-label="Reservation reason"><option value="All">All reasons</option></select>
+    </div>
+    <input class="in search" id="q" type="search" placeholder="Search job, container, ASN, location, barcode or user" aria-label="Search">
     <button class="tag" id="tagAge" type="button" hidden></button>
     <button class="btn" id="reset" type="button">Reset filters</button>
     <div class="exbar">
@@ -237,7 +250,7 @@ details.setup ol{margin:10px 0 4px;padding-left:20px;display:grid;gap:6px}
     </div>
   </div>
 
-  <section class="kpis" id="kpis">
+  <section class="kpis pv" id="kpis">
     <div class="kpi" style="--k:var(--y)"><span class="lbl">Remaining qty</span><span class="big" data-k="items">—</span></div>
     <div class="kpi" style="--k:var(--g)"><span class="lbl">Completed qty</span><span class="big" data-k="doneQty">—</span></div>
     <div class="kpi" style="--k:var(--o)"><span class="lbl">Pending qty (not started)</span><span class="big" data-k="pendingQty">—</span></div>
@@ -247,7 +260,7 @@ details.setup ol{margin:10px 0 4px;padding-left:20px;display:grid;gap:6px}
     <div class="kpi" style="--k:var(--p)"><span class="lbl">Oldest (days)</span><span class="big" data-k="oldest">—</span></div>
   </section>
 
-  <div class="grid2">
+  <div class="grid2 pv">
     <section class="panel" id="aging">
       <div class="ph">
         <div class="ico" style="--ic:rgba(248,113,113,.14);--icc:var(--r)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="8"/><path d="M12 8v4l3 2"/></svg></div>
@@ -264,7 +277,7 @@ details.setup ol{margin:10px 0 4px;padding-left:20px;display:grid;gap:6px}
     </section>
   </div>
 
-  <section class="panel" id="daily">
+  <section class="panel pv" id="daily">
     <div class="ph">
       <div class="ico" style="--ic:rgba(52,211,153,.14);--icc:var(--g)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg></div>
       <div><h2 class="h">Remaining qty, by creation day</h2></div>
@@ -272,7 +285,7 @@ details.setup ol{margin:10px 0 4px;padding-left:20px;display:grid;gap:6px}
     <div class="chart" id="dayChart"></div>
   </section>
 
-  <section class="panel" id="jobsec">
+  <section class="panel pv" id="jobsec">
     <div class="ph">
       <div class="ico" style="--ic:rgba(167,139,250,.16);--icc:var(--p)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="4" y="4" width="16" height="16" rx="3"/><path d="M4 10h16M10 10v10"/></svg></div>
       <div><h2 class="h">Open putaway jobs</h2></div>
@@ -298,6 +311,49 @@ details.setup ol{margin:10px 0 4px;padding-left:20px;display:grid;gap:6px}
     </div>
     <div class="foot"><span id="count"></span><button class="btn" id="more" type="button" hidden>Show 200 more</button></div>
   </section>
+
+  <!-- reservations -->
+  <section class="sec rv" id="r-warehouses">
+    <div><h2 class="h">Active reservations by warehouse</h2></div>
+    <div class="cards" id="rcards"></div>
+  </section>
+  <section class="kpis rv" id="rkpis">
+    <div class="kpi" style="--k:var(--y)"><span class="lbl">Reserved qty</span><span class="big" data-r="qty">—</span></div>
+    <div class="kpi" style="--k:var(--b)"><span class="lbl">Reservation lines</span><span class="big" data-r="lines">—</span></div>
+    <div class="kpi" style="--k:var(--p)"><span class="lbl">Locations</span><span class="big" data-r="locs">—</span></div>
+    <div class="kpi" style="--k:var(--g)"><span class="lbl">Barcodes</span><span class="big" data-r="bars">—</span></div>
+    <div class="kpi" style="--k:var(--o)"><span class="lbl">Qty reserved over 2 days</span><span class="big" data-r="old">—</span></div>
+    <div class="kpi" style="--k:var(--r)"><span class="lbl">Oldest (days)</span><span class="big" data-r="oldest">—</span></div>
+  </section>
+  <div class="grid2 rv">
+    <section class="panel" id="r-aging">
+      <div class="ph"><div class="ico" style="--ic:rgba(248,113,113,.14);--icc:var(--r)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="8"/><path d="M12 8v4l3 2"/></svg></div><div><h2 class="h">Reserved for</h2></div></div>
+      <div class="exrows" id="rAge"></div>
+    </section>
+    <section class="panel" id="r-reasons">
+      <div class="ph"><div class="ico" style="--ic:rgba(96,165,250,.14);--icc:var(--b)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 6h12M4 12h16M4 18h8"/></svg></div><div><h2 class="h">Reserved qty by reason</h2></div></div>
+      <div class="chart" id="rReason"></div>
+    </section>
+  </div>
+  <section class="panel rv" id="r-sec">
+    <div class="ph"><div class="ico" style="--ic:rgba(167,139,250,.16);--icc:var(--p)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="4" y="4" width="16" height="16" rx="3"/><path d="M4 10h16M10 10v10"/></svg></div><div><h2 class="h">Active reservations</h2></div></div>
+    <div class="tablewrap">
+      <table id="rtbl">
+        <thead><tr>
+          <th class="colwh"><button type="button" data-rsort="wh">Warehouse</button></th>
+          <th><button type="button" data-rsort="loc">Location</button></th>
+          <th><button type="button" data-rsort="bar">Barcode</button></th>
+          <th><button type="button" data-rsort="reason">Reason</button></th>
+          <th class="num"><button type="button" data-rsort="qty">Reserved qty</button></th>
+          <th><button type="button" data-rsort="since">Reserved since</button></th>
+          <th class="num"><button type="button" data-rsort="age">Age (days)</button></th>
+          <th class="hide-sm"><button type="button" data-rsort="user">User</button></th>
+        </tr></thead>
+        <tbody id="rbody"></tbody>
+      </table>
+    </div>
+    <div class="foot"><span id="rcount"></span><button class="btn" id="rmore" type="button" hidden>Show 200 more</button></div>
+  </section>
 </main>
 
 <script>
@@ -322,10 +378,11 @@ const CHECK_EVERY_SECONDS = 60;
   ];
   const AGL = Object.fromEntries(AG.map((a) => [a.k, a.l]));
   const ageBucket = (d) => AG.find((a) => a.t(d)).k;
-  const st = { whs: new Set(), from: '', to: '', status: 'All', ptype: 'All', food: 'All', q: '', age: null, sortKey: 'age', sortDir: -1, shown: 200 };
+  const st = { mode: 'pend', reason: 'All', rage: null, rsort: 'qty', rdir: -1, rshown: 200, whs: new Set(), from: '', to: '', status: 'All', ptype: 'All', food: 'All', q: '', age: null, sortKey: 'age', sortDir: -1, shown: 200 };
   const H = { apikey: SB_READ_KEY, Authorization: 'Bearer ' + SB_READ_KEY };
   const API = SB_URL + '/rest/v1/stocktake_snapshots?id=eq.3&select=';
   let RAW = null, L = [], lastAt = null, updatedLabel = '';
+  let RRAW = null, R = [], rAt = null;
   const when = (t) => new Date(t).toLocaleString([], { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
   const ts = (s) => String(s || '').replace('T', ' ').slice(0, 19);
 
@@ -349,15 +406,32 @@ const CHECK_EVERY_SECONDS = 60;
     try {
       if (RAW && !force) {
         const r = await fetch(API + 'updated_at', { headers: H, cache: 'no-store' });
-        if (r.ok) { const j = await r.json(); if (j[0] && j[0].updated_at === lastAt) { setLive('ok', 'LIVE'); build(); render(); return; } }
+        if (r.ok) { const j = await r.json(); if (j[0] && j[0].updated_at === lastAt) { await loadRes(); setLive('ok', 'LIVE'); build(); render(); return; } }
       }
       const res = await fetch(API + 'updated_at,row_count,cols,rows', { headers: H, cache: 'no-store' });
       if (!res.ok) throw new Error('Supabase answered ' + res.status);
       const j = await res.json();
       if (!j[0]) { RAW = null; setLive('err', 'No data yet'); render('No data yet. Click the Refresh Putaway bookmark on grocery-tools.noon.team.'); return; }
       RAW = j[0]; lastAt = RAW.updated_at; updatedLabel = when(lastAt); $('#loadedAt').textContent = updatedLabel;
-      build(); fillSelects(); setLive('ok', 'LIVE'); render();
+      build(); fillSelects(); await loadRes(); setLive('ok', 'LIVE'); render();
     } catch (e) { setLive('err', 'Load failed'); if (!RAW) render('Could not load the data. ' + e.message); }
+  }
+  async function loadRes() {
+    try {
+      const A = SB_URL + '/rest/v1/stocktake_snapshots?id=eq.4&select=';
+      const r = await fetch(A + 'updated_at', { headers: H, cache: 'no-store' }); if (!r.ok) return;
+      const j = await r.json(); if (!j[0] || j[0].updated_at === rAt) return;
+      const r2 = await fetch(A + 'updated_at,cols,rows', { headers: H, cache: 'no-store' }); if (!r2.ok) return;
+      RRAW = (await r2.json())[0]; rAt = RRAW && RRAW.updated_at; buildRes();
+    } catch (e) {}
+  }
+  function buildRes() {
+    if (!RRAW) { R = []; return; }
+    const t = Date.now(); const ix = Object.fromEntries(RRAW.cols.map((c, i) => [c, i])); const g = (a, c) => (ix[c] == null ? '' : a[ix[c]] ?? '');
+    R = RRAW.rows.map((a) => { const since = ts(g(a, 'reserved_since')); const ms = Date.parse(since.replace(' ', 'T')); const age = isNaN(ms) ? 0 : Math.max(0, Math.floor((t - ms) / 864e5));
+      return { wh: g(a, 'partner_warehouse_code'), loc: g(a, 'location_code'), bar: g(a, 'barcode'), reason: g(a, 'reservation_reason') || '—', since, day: since.slice(0, 10), age, ab: ageBucket(age), user: String(g(a, 'user_mail')).split('@')[0], qty: +g(a, 'qty_reserved') || 0 }; }).filter((r) => r.wh);
+    const s = $('#reason'); const vals = [...new Set(R.map((r) => r.reason))].sort(); const cur = st.reason;
+    s.replaceChildren(new Option('All reasons', 'All'), ...vals.map((v) => new Option(v, v))); s.value = vals.includes(cur) ? cur : 'All'; st.reason = s.value;
   }
   function fillSelects() {
     const fill = (id, vals, all, key) => { const s = $(id); const cur = st[key]; s.replaceChildren(new Option(all, 'All'), ...vals.map((v) => new Option(v, v))); s.value = vals.includes(cur) ? cur : 'All'; st[key] = s.value; };
@@ -390,6 +464,9 @@ const CHECK_EVERY_SECONDS = 60;
     $('#flt').textContent = ex.length ? ' · ' + ex.join(' · ') : '';
     $('#exScope').textContent = 'Export: ' + (st.whs.size ? selList().join(', ') : 'all warehouses') + (ex.length ? ' (filtered)' : '');
     $('#tagAge').hidden = !st.age; $('#tagAge').textContent = st.age ? 'Age: ' + AGL[st.age] + ' ×' : '';
+    document.body.classList.toggle('mode-res', st.mode === 'res');
+    document.querySelectorAll('[data-mode]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.mode === st.mode)));
+    if (st.mode === 'res') { drawRes(); drawDr(); return; }
     drawCards(emptyMsg); drawChips(); drawKpis(); drawAge(); drawTypes(); drawDays(); drawTable(emptyMsg); drawDr();
   }
   function drawCards(emptyMsg) {
@@ -482,6 +559,90 @@ const CHECK_EVERY_SECONDS = 60;
   const jobsOut = () => jobView().map((l) => ({ Warehouse: l.wh, Job: l.job, Container: l.cont, 'Process type': l.ptype, 'Grouping key': l.grp, Status: l.status, 'Remaining qty': l.rem, 'Completed qty': l.done, Food: l.food ? 'Food' : 'Non-food', ASN: l.asn, User: l.user, 'Source pack warehouse': l.src, Created: l.created, Opened: l.opened, 'Age (days)': l.age, 'Open for': AGL[l.ab] }));
   function toCSV(rows) { if (!rows.length) return ''; const cols = Object.keys(rows[0]); const esc = (v) => { const s = v == null ? '' : String(v); return /[",\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s; }; return '\uFEFF' + [cols.join(','), ...rows.map((r) => cols.map((c) => esc(r[c])).join(','))].join('\n'); }
   function download(blob, name) { const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = name; document.body.append(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 1000); }
+  // ---------- reservations view ----------
+  const resView = (skip) => {
+    const q = st.q.trim().toLowerCase();
+    return R.filter((r) => (skip === 'wh' || inWh(r.wh)) && (!st.from || r.day >= st.from) && (!st.to || r.day <= st.to) && (skip === 'reason' || st.reason === 'All' || r.reason === st.reason) && (skip === 'age' || !st.rage || r.ab === st.rage) && matchQ(q, r.loc, r.bar, r.user, r.reason));
+  };
+  const rk = (v) => ({ qty: d3.sum(v, (r) => r.qty), lines: v.length, locs: new Set(v.map((r) => r.wh + '|' + r.loc)).size, bars: new Set(v.map((r) => r.bar)).size, old: d3.sum(v.filter((r) => r.age > 2), (r) => r.qty), oldest: v.length ? d3.max(v, (r) => r.age) : 0 });
+  function drawRes() {
+    const ex = [];
+    if (st.from || st.to) ex.push('reserved ' + (st.from || 'start') + ' → ' + (st.to || 'today'));
+    if (st.reason !== 'All') ex.push(st.reason); if (st.rage) ex.push('reserved for ' + AGL[st.rage]); if (st.q.trim()) ex.push('search "' + st.q.trim() + '"');
+    $('#selName').textContent = scopeName(); $('#flt').textContent = ' · reservations' + (ex.length ? ' · ' + ex.join(' · ') : '');
+    $('#exScope').textContent = 'Export: ' + (st.whs.size ? selList().join(', ') : 'all warehouses') + ' reservations' + (ex.length ? ' (filtered)' : '');
+    $('#tagAge').hidden = !st.rage; $('#tagAge').textContent = st.rage ? 'Reserved for: ' + AGL[st.rage] + ' ×' : '';
+    if (!RRAW) { $('#rcards').replaceChildren(el('div', 'msg', 'No reservations data yet. Click the Refresh Putaway bookmark on grocery-tools.noon.team (it now pulls reservations too).')); }
+    const all = resView('wh');
+    if (RRAW) $('#rcards').replaceChildren(...WAREHOUSES.map((wh) => {
+      const v = all.filter((r) => r.wh === wh); const k = rk(v);
+      const b = el('button', 'card'); b.type = 'button'; b.dataset.wh = wh; b.setAttribute('aria-pressed', String(st.whs.has(wh)));
+      const top = el('div', 'card-top'); const sk = el('span', 'skus'); sk.append(el('b', '', F(k.lines)), k.lines === 1 ? ' line' : ' lines'); top.append(el('span', 'wh', wh), sk);
+      const bar = el('div', 'bar'); AG.forEach((a) => { const n = d3.sum(v.filter((r) => r.ab === a.k), (r) => r.qty); const i = el('i'); i.style.width = (100 * n / (k.qty || 1)) + '%'; i.style.background = a.c; bar.append(i); });
+      const mini = el('div', 'mini'); const part = (x, label, bad) => { const sp = el('span', bad ? 'bad' : ''); sp.append(el('b', '', F(x)), ' ' + label); return sp; };
+      mini.append(part(k.locs, 'locations'), part(k.old, 'over 2d', k.old > 0), part(k.oldest, 'days oldest', k.oldest > 2));
+      b.append(top, el('div', 'big', F(k.qty)), el('div', 'lbl', 'Reserved qty'), bar, mini); return b;
+    }));
+    const cnt = d3.rollup(all, (v) => d3.sum(v, (r) => r.qty), (r) => r.wh);
+    const mk = (w, label, n) => { const b = el('button', 'chip', label); b.append(el('span', 'n', F(n))); b.type = 'button'; b.dataset.wh = w; b.setAttribute('aria-pressed', String(w === 'All' ? !st.whs.size : st.whs.has(w))); return b; };
+    $('#chips').replaceChildren(mk('All', 'All warehouses', d3.sum(all, (r) => r.qty)), ...WAREHOUSES.map((w) => mk(w, w, cnt.get(w) || 0)));
+    const k = rk(resView()); document.querySelectorAll('#rkpis [data-r]').forEach((e) => { e.textContent = RRAW ? F(k[e.dataset.r]) : '—'; });
+    // aging
+    const av = resView('age'); const data = AG.map((a) => { const v = av.filter((r) => r.ab === a.k); return { ...a, n: d3.sum(v, (r) => r.qty), lines: v.length }; });
+    const max = d3.max(data, (d) => d.n) || 1, tq = d3.sum(data, (d) => d.n) || 1, P = d3.format('.1%');
+    const head = el('div', 'exhead'); head.append(el('span', '', 'Reserved for'), el('span', '', ''), el('span', '', 'Qty'), el('span', '', 'Share'), el('span', '', 'Lines'));
+    $('#rAge').replaceChildren(head, ...data.map((d) => { const b = el('button', 'exrow'); b.type = 'button'; b.dataset.rage = d.k; b.setAttribute('aria-pressed', String(st.rage === d.k));
+      const l = el('span', 'exl'); const dot = el('i'); dot.style.background = d.c; l.append(dot, d.l);
+      const tr = el('span', 'extrack'); const f = el('i'); f.style.width = (100 * d.n / max) + '%'; f.style.background = d.c; if (!d.n) f.style.minWidth = '0'; tr.append(f);
+      b.append(l, tr, el('span', 'exq', F(d.n)), el('span', 'exp', d.n ? P(d.n / tq) : '–'), el('span', 'exs', F(d.lines))); return b; }));
+    // reasons
+    const box = $('#rReason'); box.replaceChildren();
+    const rows = d3.rollups(resView(), (v) => [d3.sum(v, (r) => r.qty), v.length], (r) => r.reason).sort((a, b) => b[1][0] - a[1][0]);
+    if (!rows.length) box.append(el('div', 'msg', RRAW ? 'No reservations for these filters.' : 'No data yet.'));
+    else {
+      const W = Math.max(280, box.clientWidth), rowH = 28, Hh = rows.length * rowH + 6, L0 = 150, Rr = 130;
+      const svg = d3.select(box).append('svg').attr('width', '100%').attr('viewBox', `0 0 ${W} ${Hh}`).attr('height', Hh).attr('role', 'img').attr('aria-label', 'Reserved qty by reason');
+      const x = d3.scaleLinear([0, d3.max(rows, (r) => r[1][0])], [0, Math.max(10, W - L0 - Rr)]);
+      const g = svg.selectAll('g').data(rows).join('g').attr('transform', (d, i) => `translate(0,${i * rowH + 3})`).style('cursor', 'pointer')
+        .on('click', (e, d) => { st.reason = st.reason === d[0] ? 'All' : d[0]; $('#reason').value = st.reason; st.rshown = 200; render(); });
+      g.append('text').attr('x', L0 - 10).attr('y', rowH / 2 - 1).attr('dy', '.35em').attr('text-anchor', 'end').attr('font-size', 12).style('fill', (d) => (d[0] === st.reason ? 'var(--y)' : 'var(--muted)')).text((d) => d[0]);
+      g.append('rect').attr('x', L0).attr('y', 5).attr('height', rowH - 11).attr('rx', 4).attr('width', (d) => Math.max(2, x(d[1][0]))).style('fill', (d, i) => (d[0] === st.reason || (st.reason === 'All' && i === 0) ? 'var(--y)' : 'var(--b)'));
+      g.append('text').attr('x', (d) => L0 + Math.max(2, x(d[1][0])) + 6).attr('y', rowH / 2 - 1).attr('dy', '.35em').attr('font-size', 12).attr('font-weight', 700).style('fill', 'var(--fg)').text((d) => F(d[1][0]) + ' qty · ' + F(d[1][1]) + ' lines');
+    }
+    // table
+    const tv = resView().sort((a, b) => { const va = a[st.rsort], vb = b[st.rsort]; const c = typeof va === 'number' ? va - vb : String(va).localeCompare(String(vb)); return c * st.rdir || b.qty - a.qty; });
+    document.querySelectorAll('#rtbl th').forEach((th) => { const kk = th.querySelector('button').dataset.rsort; if (kk === st.rsort) th.setAttribute('aria-sort', st.rdir > 0 ? 'ascending' : 'descending'); else th.removeAttribute('aria-sort'); });
+    $('#rtbl').classList.toggle('single', st.whs.size === 1);
+    const frag = document.createDocumentFragment();
+    tv.slice(0, st.rshown).forEach((r) => { const tr = el('tr', r.age > 7 ? 'age-r' : r.age > 2 ? 'age-o' : ''); const td = (c, v) => tr.append(el('td', c, v));
+      td('c-wh colwh', r.wh); td('c-loc', r.loc); td('c-sku', r.bar); td('c-fam', r.reason); td('num', F(r.qty)); td('c-date', r.since.slice(0, 16)); td('num age', F(r.age)); td('c-fam hide-sm', r.user || '—'); frag.append(tr); });
+    $('#rbody').replaceChildren(frag);
+    $('#rcount').textContent = tv.length ? `Showing ${F(Math.min(st.rshown, tv.length))} of ${F(tv.length)} lines · ${F(d3.sum(tv, (r) => r.qty))} reserved qty` : (RRAW ? 'No reservations match these filters.' : '');
+    $('#rmore').hidden = tv.length <= st.rshown;
+  }
+  const resOut = () => resView().sort((a, b) => a.wh.localeCompare(b.wh) || b.qty - a.qty).map((r) => ({ Warehouse: r.wh, Location: r.loc, Barcode: r.bar, Reason: r.reason, 'Reserved qty': r.qty, 'Reserved since': r.since, 'Age (days)': r.age, 'Reserved for': AGL[r.ab], User: r.user }));
+  $('#exCsv').addEventListener('click', (e) => {
+    if (st.mode !== 'res') return; e.stopImmediatePropagation();
+    const r = resOut(); if (!r.length) { alert('No reservations match these filters.'); return; }
+    download(new Blob([toCSV(r)], { type: 'text/csv;charset=utf-8' }), `Reservations_${scopeFile()}_${stamp()}.csv`);
+  });
+  $('#exXlsx').addEventListener('click', (e) => {
+    if (st.mode !== 'res') return; e.stopImmediatePropagation();
+    if (!RRAW) { alert('No reservations data yet.'); return; }
+    if (!window.XLSX) { alert('Excel export could not load. Check your connection and try again.'); return; }
+    const wb = XLSX.utils.book_new();
+    const add = (name, rows) => { const ws = XLSX.utils.json_to_sheet(rows.length ? rows : [{ Note: 'No rows' }]); const cols = Object.keys(rows[0] || { Note: '' }); ws['!cols'] = cols.map((c) => ({ wch: Math.min(40, Math.max(c.length + 2, ...rows.slice(0, 300).map((x) => String(x[c] ?? '').length + 1))) })); XLSX.utils.book_append_sheet(wb, ws, name); };
+    const info = XLSX.utils.aoa_to_sheet([['CAIID Active Reservations export'], [], ['Warehouses', scopeName()], ['Reserved from', st.from || 'Start'], ['Reserved to', st.to || 'Today'], ['Reason', st.reason], ['Reserved for', st.rage ? AGL[st.rage] : 'All'], ['Search', st.q.trim() || '—'], ['Data updated', rAt ? when(rAt) : '—'], ['Exported', new Date().toLocaleString()]]);
+    info['!cols'] = [{ wch: 16 }, { wch: 50 }]; XLSX.utils.book_append_sheet(wb, info, 'Info');
+    const v = resView(); const whs = st.whs.size ? selList() : WAREHOUSES;
+    const sum = whs.map((w) => { const k = rk(v.filter((r) => r.wh === w)); return { Warehouse: w, 'Reserved qty': k.qty, Lines: k.lines, Locations: k.locs, Barcodes: k.bars, 'Qty over 2 days': k.old, 'Oldest (days)': k.oldest }; });
+    if (whs.length > 1) { const k = rk(v); sum.push({ Warehouse: 'Total', 'Reserved qty': k.qty, Lines: k.lines, Locations: k.locs, Barcodes: k.bars, 'Qty over 2 days': k.old, 'Oldest (days)': k.oldest }); }
+    add('Warehouses', sum);
+    add('Reasons', d3.rollups(v, (x) => [d3.sum(x, (r) => r.qty), x.length], (r) => r.reason).sort((a, b) => b[1][0] - a[1][0]).map(([r, [q, n]]) => ({ Reason: r, 'Reserved qty': q, Lines: n })));
+    const av = resView('age'); add('Aging', AG.map((a) => ({ 'Reserved for': a.l, 'Reserved qty': d3.sum(av.filter((r) => r.ab === a.k), (r) => r.qty), Lines: av.filter((r) => r.ab === a.k).length })));
+    add('Reservations', resOut());
+    XLSX.writeFile(wb, `Reservations_${scopeFile()}_${stamp()}.xlsx`);
+  });
   $('#exCsv').addEventListener('click', () => { if (!RAW) { alert('No data loaded yet.'); return; } const r = jobsOut(); if (!r.length) { alert('No jobs match these filters.'); return; } download(new Blob([toCSV(r)], { type: 'text/csv;charset=utf-8' }), `Putaway_open_${scopeFile()}_${stamp()}.csv`); });
   $('#exXlsx').addEventListener('click', () => {
     if (!RAW) { alert('No data loaded yet.'); return; }
@@ -513,7 +674,14 @@ const CHECK_EVERY_SECONDS = 60;
   ['status', 'ptype', 'food'].forEach((k) => $('#' + k).addEventListener('change', (e) => { st[k] = e.target.value; st.shown = 200; render(); }));
   let qt; $('#q').addEventListener('input', (e) => { clearTimeout(qt); qt = setTimeout(() => { st.q = e.target.value; st.shown = 200; render(); }, 200); });
   $('#ageChart').addEventListener('click', (e) => { const b = e.target.closest('button[data-age]'); if (b) { st.age = st.age === b.dataset.age ? null : b.dataset.age; st.shown = 200; render(); } });
-  $('#tagAge').addEventListener('click', () => { st.age = null; render(); });
+  $('#tagAge').addEventListener('click', () => { if (st.mode === 'res') st.rage = null; else st.age = null; render(); });
+  document.querySelector('.modes').addEventListener('click', (e) => { const b = e.target.closest('[data-mode]'); if (!b) return; st.mode = b.dataset.mode; render(); });
+  $('#reason').addEventListener('change', (e) => { st.reason = e.target.value; st.rshown = 200; render(); });
+  $('#rAge').addEventListener('click', (e) => { const b = e.target.closest('button[data-rage]'); if (b) { st.rage = st.rage === b.dataset.rage ? null : b.dataset.rage; st.rshown = 200; render(); } });
+  $('#rcards').addEventListener('click', (e) => { const b = e.target.closest('button[data-wh]'); if (b) toggleWh(b.dataset.wh); });
+  $('#rmore').addEventListener('click', () => { st.rshown += 200; render(); });
+  $('#rtbl thead').addEventListener('click', (e) => { const b = e.target.closest('button[data-rsort]'); if (!b) return; const k = b.dataset.rsort; if (k === st.rsort) st.rdir = -st.rdir; else { st.rsort = k; st.rdir = ['qty', 'age'].includes(k) ? -1 : 1; } render(); });
+  $('#reset').addEventListener('click', () => { st.reason = 'All'; st.rage = null; $('#reason').value = 'All'; });
   $('#reset').addEventListener('click', () => { st.whs.clear(); Object.assign(st, { from: '', to: '', status: 'All', ptype: 'All', food: 'All', q: '', age: null, sortKey: 'age', sortDir: -1, shown: 200 }); ['#q', '#dFrom', '#dTo'].forEach((s) => { $(s).value = ''; }); ['#status', '#ptype', '#food'].forEach((s) => { $(s).value = 'All'; }); render(); });
   $('#more').addEventListener('click', () => { st.shown += 200; drawTable(); });
   $('#tbl thead').addEventListener('click', (e) => { const b = e.target.closest('button[data-sort]'); if (!b) return; const k = b.dataset.sort; if (k === st.sortKey) st.sortDir = -st.sortDir; else { st.sortKey = k; st.sortDir = ['age', 'rem', 'done'].includes(k) ? -1 : 1; } st.shown = 200; drawTable(); });
