@@ -246,7 +246,7 @@ td.num.ok{color:var(--g);font-weight:800} td.num.low{color:var(--r);font-weight:
   </div>
   <nav class="nav" aria-label="Sections">
     <a class="pv" href="#warehouses">Overview</a><a class="pv" href="#aging">Aging</a><a class="pv" href="#types">Process types</a><a class="pv" href="#daily">By day</a><a class="pv" href="#jobsec">Jobs</a>
-    <a class="qv" href="#p-warehouses">Overview</a><a class="qv" href="#p-days">By day</a><a class="qv" href="#p-hours">By hour</a><a class="qv" href="#p-top">Top 5</a><a class="qv" href="#p-tenure">Tenure</a><a class="qv" href="#p-hourly">Hourly by user</a><a class="qv" href="#p-hlead">Best & worst by hour</a><a class="qv" href="#p-users">Users</a>
+    <a class="qv" href="#p-warehouses">Overview</a><a class="qv" href="#p-days">By day</a><a class="qv" href="#p-hours">By hour</a><a class="qv" href="#p-top">Top 5</a><a class="qv" href="#p-tenure">Employee aging</a><a class="qv" href="#p-hourly">Hourly by user</a><a class="qv" href="#p-hlead">Best & worst by hour</a><a class="qv" href="#p-users">Users</a>
     <a class="rv" href="#r-warehouses">Overview</a><a class="rv" href="#r-aging">Aging</a><a class="rv" href="#r-reasons">Reasons</a><a class="rv" href="#r-sec">Reservations</a>
   </nav>
 </header>
@@ -288,7 +288,7 @@ td.num.ok{color:var(--g);font-weight:800} td.num.low{color:var(--r);font-weight:
     <div class="sel qv">
       <span class="pill">Process type <b>inbound</b></span>
       <select class="in" id="phour" aria-label="Hour"><option value="All">All hours</option></select>
-      <select class="in" id="pten" aria-label="Employee tenure"><option value="All">All tenures</option></select>
+      <span class="pill">Employee aging</span><select class="in" id="pten" aria-label="Employee aging"><option value="All">All employees</option></select>
       <button class="btn yb" id="pLoad" type="button">Load productivity CSV</button>
       <input type="file" id="pFile" accept=".csv,text/csv" multiple hidden>
     </div>
@@ -393,7 +393,7 @@ td.num.ok{color:var(--g);font-weight:800} td.num.low{color:var(--r);font-weight:
     </section>
   </div>
   <section class="panel qv" id="p-tenure">
-    <div class="ph"><div class="ico" style="--ic:rgba(167,139,250,.16);--icc:var(--p)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg></div><div><h2 class="h">IPH by employee tenure</h2><p class="note" id="tenNote"></p></div></div>
+    <div class="ph"><div class="ico" style="--ic:rgba(167,139,250,.16);--icc:var(--p)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg></div><div><h2 class="h">IPH by employee aging (since hiring date)</h2><p class="note" id="tenNote"></p></div></div>
     <div class="exrows" id="pTen"></div>
   </section>
   <section class="panel qv" id="p-days">
@@ -428,7 +428,7 @@ td.num.ok{color:var(--g);font-weight:800} td.num.low{color:var(--r);font-weight:
           <th class="colwh"><button type="button" data-psort="wh">Warehouse</button></th>
           <th><button type="button" data-psort="eid">Employee ID</button></th>
           <th><button type="button" data-psort="name">Name</button></th>
-          <th class="num"><button type="button" data-psort="ten">Tenure</button></th>
+          <th class="num"><button type="button" data-psort="ten">Employee aging</button></th>
           <th><button type="button" data-psort="user">Username</button></th>
           <th class="num"><button type="button" data-psort="items">Items</button></th>
           <th class="num"><button type="button" data-psort="hours">Active hours</button></th>
@@ -792,7 +792,7 @@ const ATTEND_CSV_URL_2 = 'https://docs.google.com/spreadsheets/d/' + ATTEND_SHEE
     if (st.mode === 'prod') render();
   }
   function drawProd() {
-    const ex = []; if (st.from || st.to) ex.push('days ' + (st.from || 'start') + ' → ' + (st.to || 'today')); if (st.pptype !== 'All') ex.push(st.pptype); if (st.phour !== 'All') ex.push('hour ' + String(st.phour).padStart(2, '0') + ':00'); if (st.pten !== 'All') ex.push('tenure ' + TENL[st.pten]); if (st.q.trim()) ex.push('search "' + st.q.trim() + '"');
+    const ex = []; if (st.from || st.to) ex.push('days ' + (st.from || 'start') + ' → ' + (st.to || 'today')); if (st.pptype !== 'All') ex.push(st.pptype); if (st.phour !== 'All') ex.push('hour ' + String(st.phour).padStart(2, '0') + ':00'); if (st.pten !== 'All') ex.push('employee aging ' + TENL[st.pten]); if (st.q.trim()) ex.push('search "' + st.q.trim() + '"');
     $('#selName').textContent = scopeName(); $('#flt').textContent = ' · productivity' + (ex.length ? ' · ' + ex.join(' · ') : '');
     $('#exScope').textContent = 'Export: ' + (st.whs.size ? selList().join(', ') : 'all warehouses') + ' productivity' + (ex.length ? ' (filtered)' : '');
     $('#tagAge').hidden = true;
@@ -800,9 +800,9 @@ const ATTEND_CSV_URL_2 = 'https://docs.google.com/spreadsheets/d/' + ATTEND_SHEE
     { const hs = [...new Set(prodView('hour').map((r) => r.hour).filter((h) => h != null))].sort((a, b) => a - b); const s2 = $('#phour'); const cur = st.phour;
       s2.replaceChildren(new Option('All hours', 'All'), ...hs.map((h) => new Option(String(h).padStart(2, '0') + ':00', String(h)))); s2.value = cur === 'All' || hs.includes(+cur) ? cur : 'All'; st.phour = s2.value; }
     { const s3 = $('#pten'); const cur = st.pten; const keys = [...TEN.map((t) => t.k), 'tu'];
-      s3.replaceChildren(new Option('All tenures', 'All'), ...keys.map((k) => new Option(TENL[k], k))); s3.value = keys.includes(cur) ? cur : 'All'; st.pten = s3.value; }
+      s3.replaceChildren(new Option('Employee aging: all', 'All'), ...keys.map((k) => new Option(TENL[k], k))); s3.value = keys.includes(cur) ? cur : 'All'; st.pten = s3.value; }
     { const tv = prodView('ten'); const rows = [...TEN.map((t) => t.k), 'tu'].map((k) => { const x = tv.filter((r) => tenureKey(r.user) === k); return { k, l: TENL[k], ...pk(x) }; }).filter((r) => r.users || r.k !== 'tu');
-      const max = d3.max(rows, (r) => r.iph) || 1; const head = el('div', 'exhead'); head.append(el('span', '', 'Tenure'), el('span', '', ''), el('span', '', 'IPH'), el('span', '', 'Users'), el('span', '', 'At target'));
+      const max = d3.max(rows, (r) => r.iph) || 1; const head = el('div', 'exhead'); head.append(el('span', '', 'Employee aging'), el('span', '', ''), el('span', '', 'IPH'), el('span', '', 'Users'), el('span', '', 'At target'));
       $('#pTen').replaceChildren(head, ...rows.map((r) => { const b = el('button', 'exrow'); b.type = 'button'; b.dataset.ten = r.k; b.setAttribute('aria-pressed', String(st.pten === r.k));
         const l = el('span', 'exl'); const dot = el('i'); dot.style.background = r.k === 'tu' ? 'var(--muted)' : 'var(--p)'; l.append(dot, r.l);
         const tr = el('span', 'extrack'); const f = el('i'); f.style.width = (100 * r.iph / max) + '%'; f.style.background = r.iph >= P_TARGET ? 'var(--g)' : r.iph >= 700 ? 'var(--o)' : 'var(--r)'; if (!r.iph) f.style.minWidth = '0'; tr.append(f);
@@ -967,7 +967,7 @@ const ATTEND_CSV_URL_2 = 'https://docs.google.com/spreadsheets/d/' + ATTEND_SHEE
   $('#pTen').addEventListener('click', (e) => { const b = e.target.closest('button[data-ten]'); if (b) { st.pten = st.pten === b.dataset.ten ? 'All' : b.dataset.ten; st.pshown = 200; render(); } });
   $('#pcards').addEventListener('click', (e) => { const b = e.target.closest('button[data-wh]'); if (b) toggleWh(b.dataset.wh); });
   $('#ptbl thead').addEventListener('click', (e) => { const b = e.target.closest('button[data-psort]'); if (!b) return; const k = b.dataset.psort; if (k === st.psort) st.pdir = -st.pdir; else { st.psort = k; st.pdir = ['items', 'hours', 'iph', 'days', 'vs', 'atH', 'ten'].includes(k) ? -1 : 1; } render(); });
-  const prodUsersOut = () => S_prodUsers.map((u) => ({ Warehouse: u.wh, 'Employee ID': u.eid, Name: u.name, 'Tenure (days)': u.ten ?? '', 'Tenure group': TENL[tenureKey(u.full)], Username: u.full, Items: u.items, 'Active hours': u.hours, IPH: u.iph, 'vs target (1,000)': Math.round(100 * u.iph / P_TARGET) + '%', 'Hours at target': u.atH, Days: u.days }));
+  const prodUsersOut = () => S_prodUsers.map((u) => ({ Warehouse: u.wh, 'Employee ID': u.eid, Name: u.name, 'Employee aging (days since hiring)': u.ten ?? '', 'Employee aging group': TENL[tenureKey(u.full)], Username: u.full, Items: u.items, 'Active hours': u.hours, IPH: u.iph, 'vs target (1,000)': Math.round(100 * u.iph / P_TARGET) + '%', 'Hours at target': u.atH, Days: u.days }));
   $('#exCsv').addEventListener('click', (e) => { if (st.mode !== 'prod') return; e.stopImmediatePropagation(); const r = prodUsersOut(); if (!r.length) { alert('No productivity rows for these filters.'); return; } download(new Blob([toCSV(r)], { type: 'text/csv;charset=utf-8' }), `Putaway_productivity_${scopeFile()}_${stamp()}.csv`); });
   $('#exXlsx').addEventListener('click', (e) => {
     if (st.mode !== 'prod') return; e.stopImmediatePropagation();
