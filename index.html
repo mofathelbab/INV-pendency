@@ -511,7 +511,7 @@ const ATTEND_CSV_URL_2 = 'https://docs.google.com/spreadsheets/d/' + ATTEND_SHEE
       }
       const ix = Object.fromEntries(src.cols.map((c, i) => [c, i]));
       P = src.rows.map((a) => ({ wh: String(a[ix.partner_warehouse_code] || '').trim(), user: String(a[ix.username] || '').trim(), ptype: String(a[ix.process_type] || '').trim(), day: String(a[ix.day] || '').slice(0, 10), hour: a[ix.hour] === '' || a[ix.hour] == null ? null : +a[ix.hour], items: +a[ix.putaway_items] || 0 }))
-        .filter((r) => r.wh && r.user && r.ptype.toLowerCase() === P_ONLY_TYPE);
+        .filter((r) => WAREHOUSES.includes(r.wh) && r.user && r.ptype.toLowerCase() === P_ONLY_TYPE); // CAIID01 to CAIID07 only
       const days = [...new Set(P.map((r) => r.day).filter(Boolean))].sort();
       prodAt = d.updated_at; pMeta = { live: true, at: Date.parse(d.updated_at), files: ['live data'], from: days[0] || '', to: days[days.length - 1] || '' };
     } catch (e) {}
@@ -666,11 +666,11 @@ const ATTEND_CSV_URL_2 = 'https://docs.google.com/spreadsheets/d/' + ATTEND_SHEE
   const P_ONLY_TYPE = 'inbound'; // productivity counts inbound putaway only
   const P_TARGET = 1000; // items per user per hour
   let P = [], pMeta = null;
-  try { const raw = localStorage.getItem(P_KEY); if (raw) { const o = JSON.parse(raw); P = (o.rows || []).filter((r) => r.ptype === P_ONLY_TYPE); pMeta = o.meta || null; } } catch (e) {}
+  try { const raw = localStorage.getItem(P_KEY); if (raw) { const o = JSON.parse(raw); P = (o.rows || []).filter((r) => r.ptype === P_ONLY_TYPE && WAREHOUSES.includes(r.wh)); pMeta = o.meta || null; } } catch (e) {}
   function parseProd(text) {
     const rows = d3.csvParse(text.replace(/^\uFEFF/, ''));
     if (!['partner_warehouse_code', 'username', 'putaway_items'].every((c) => rows.columns.includes(c))) throw new Error('This is not the Putaway productivity export (needs partner_warehouse_code, username and putaway_items).');
-    return rows.map((r) => ({ wh: String(r.partner_warehouse_code || '').trim(), user: String(r.username || '').trim(), ptype: r.process_type || '—', day: String(r.day || '').slice(0, 10), hour: r.hour === '' || r.hour == null ? null : +r.hour, items: +r.putaway_items || 0 })).filter((r) => r.wh && r.user && String(r.ptype).trim().toLowerCase() === P_ONLY_TYPE);
+    return rows.map((r) => ({ wh: String(r.partner_warehouse_code || '').trim(), user: String(r.username || '').trim(), ptype: r.process_type || '—', day: String(r.day || '').slice(0, 10), hour: r.hour === '' || r.hour == null ? null : +r.hour, items: +r.putaway_items || 0 })).filter((r) => WAREHOUSES.includes(r.wh) && r.user && String(r.ptype).trim().toLowerCase() === P_ONLY_TYPE);
   }
   async function loadProdFiles(files) {
     try {
