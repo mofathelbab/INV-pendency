@@ -180,8 +180,18 @@ details.setup ol{margin:10px 0 4px;padding-left:20px;display:grid;gap:6px}
 .modes{display:inline-flex;gap:4px;background:var(--panel2);border:1px solid var(--line);border-radius:999px;padding:4px;margin-top:12px}
 .mode{appearance:none;font:inherit;font-weight:800;font-size:14px;color:var(--muted);background:none;border:0;border-radius:999px;padding:8px 16px;cursor:pointer}
 .mode[aria-pressed="true"]{background:var(--y);color:var(--yink)}
-body.mode-res .pv{display:none!important}
+body.mode-res .pv,body.mode-prod .pv{display:none!important}
 body:not(.mode-res) .rv{display:none!important}
+body:not(.mode-prod) .qv{display:none!important}
+body.mode-prod .rv-or-pv{display:none!important}
+.hm td.h{min-width:44px;text-align:center;font-variant-numeric:tabular-nums;font-size:12px;padding:6px 4px;border-left:1px solid var(--line)}
+.hm th.h{text-align:center;padding:6px 4px;min-width:44px}
+.hm td.ok{background:rgba(52,211,153,.22);color:var(--g);font-weight:800}
+.hm td.mid{background:rgba(255,181,71,.18);color:var(--o);font-weight:700}
+.hm td.low{background:rgba(248,113,113,.18);color:var(--r);font-weight:700}
+td.num.ok{color:var(--g);font-weight:800} td.num.low{color:var(--r);font-weight:800}
+.legend{display:flex;gap:12px;flex-wrap:wrap;font-size:12px;color:var(--muted)}
+.legend i{display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:5px;vertical-align:-2px}
 </style>
 </head>
 <body>
@@ -200,6 +210,7 @@ body:not(.mode-res) .rv{display:none!important}
   </div>
   <nav class="nav" aria-label="Sections">
     <a class="pv" href="#warehouses">Overview</a><a class="pv" href="#aging">Aging</a><a class="pv" href="#types">Process types</a><a class="pv" href="#daily">By day</a><a class="pv" href="#jobsec">Jobs</a>
+    <a class="qv" href="#p-warehouses">Overview</a><a class="qv" href="#p-days">By day</a><a class="qv" href="#p-hours">By hour</a><a class="qv" href="#p-hourly">Hourly by user</a><a class="qv" href="#p-users">Users</a>
     <a class="rv" href="#r-warehouses">Overview</a><a class="rv" href="#r-aging">Aging</a><a class="rv" href="#r-reasons">Reasons</a><a class="rv" href="#r-sec">Reservations</a>
   </nav>
 </header>
@@ -212,6 +223,7 @@ body:not(.mode-res) .rv{display:none!important}
     <div class="modes" role="group" aria-label="View">
       <button class="mode" type="button" data-mode="pend" aria-pressed="true">Pendencies</button>
       <button class="mode" type="button" data-mode="res" aria-pressed="false">Reservations</button>
+      <button class="mode" type="button" data-mode="prod" aria-pressed="false">Productivity</button>
     </div>
   </div>
 
@@ -236,6 +248,11 @@ body:not(.mode-res) .rv{display:none!important}
       <select class="in" id="status" aria-label="Status"><option value="All">All statuses</option></select>
       <select class="in" id="ptype" aria-label="Process type"><option value="All">All process types</option></select>
       <select class="in" id="food" aria-label="Food"><option value="All">Food + non-food</option><option value="1">Food only</option><option value="0">Non-food only</option></select>
+    </div>
+    <div class="sel qv">
+      <span class="pill">Process type <b>inbound</b></span>
+      <button class="btn yb" id="pLoad" type="button">Load productivity CSV</button>
+      <input type="file" id="pFile" accept=".csv,text/csv" multiple hidden>
     </div>
     <div class="sel rv">
       <select class="in" id="reason" aria-label="Reservation reason"><option value="All">All reasons</option></select>
@@ -312,6 +329,61 @@ body:not(.mode-res) .rv{display:none!important}
     <div class="foot"><span id="count"></span><button class="btn" id="more" type="button" hidden>Show 200 more</button></div>
   </section>
 
+  <!-- productivity -->
+  <p class="note qv" id="pInfo"></p>
+  <section class="sec qv" id="p-warehouses">
+    <div><h2 class="h">Putaway productivity by warehouse</h2></div>
+    <div class="cards" id="pcards"></div>
+  </section>
+  <section class="kpis qv" id="pkpis">
+    <div class="kpi" style="--k:var(--y)"><span class="lbl">Items put away</span><span class="big" data-p="items">—</span></div>
+    <div class="kpi" style="--k:var(--g)"><span class="lbl">IPH (items per user-hour)</span><span class="big" data-p="iph">—</span></div>
+    <div class="kpi" style="--k:var(--b)"><span class="lbl">Active users</span><span class="big" data-p="users">—</span></div>
+    <div class="kpi" style="--k:var(--p)"><span class="lbl">User-hours worked</span><span class="big" data-p="uh">—</span></div>
+    <div class="kpi" style="--k:var(--o)"><span class="lbl">Items per user per day</span><span class="big" data-p="upd">—</span></div>
+    <div class="kpi" style="--k:var(--g)"><span class="lbl">Users at target (≥ 1,000 IPH)</span><span class="big" data-p="atUsers">—</span></div>
+    <div class="kpi" style="--k:var(--r)"><span class="lbl">Hours at target</span><span class="big" data-p="atHours">—</span></div>
+  </section>
+  <section class="panel qv" id="p-days">
+    <div class="ph"><div class="ico" style="--ic:rgba(52,211,153,.14);--icc:var(--g)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg></div><div><h2 class="h">Items and IPH by day</h2></div></div>
+    <div class="chart" id="pDay"></div>
+  </section>
+  <section class="panel qv" id="p-hours">
+    <div class="ph"><div class="ico" style="--ic:rgba(96,165,250,.14);--icc:var(--b)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="8"/><path d="M12 8v4l3 2"/></svg></div><div><h2 class="h">IPH by hour of day vs target</h2></div></div>
+    <div class="chart" id="pHour"></div>
+  </section>
+  <section class="panel qv" id="p-hourly">
+    <div class="ph"><div class="ico" style="--ic:rgba(255,229,0,.12);--icc:var(--y)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 10h18M9 4v16M15 4v16"/></svg></div><div><h2 class="h">Hourly performance by user</h2></div></div>
+    <div class="inc-top" style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
+      <select class="in" id="pday" aria-label="Day"></select>
+      <div class="legend"><span><i style="background:rgba(52,211,153,.5)"></i>≥ 1,000 (target)</span><span><i style="background:rgba(255,181,71,.5)"></i>700–999</span><span><i style="background:rgba(248,113,113,.5)"></i>under 700</span><span>blank = not working</span></div>
+    </div>
+    <div class="tablewrap" style="max-height:620px">
+      <table class="hm" id="hmtbl"><thead id="hmhead"></thead><tbody id="hmbody"></tbody></table>
+    </div>
+    <div class="foot"><span id="hmcount"></span></div>
+  </section>
+  <section class="panel qv" id="p-users">
+    <div class="ph"><div class="ico" style="--ic:rgba(167,139,250,.16);--icc:var(--p)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c1-4 4-6 8-6s7 2 8 6"/></svg></div><div><h2 class="h">Users</h2></div></div>
+    <div class="tablewrap">
+      <table id="ptbl">
+        <thead><tr>
+          <th class="colwh"><button type="button" data-psort="wh">Warehouse</button></th>
+          <th><button type="button" data-psort="name">Name</button></th>
+          <th><button type="button" data-psort="user">Username</button></th>
+          <th class="num"><button type="button" data-psort="items">Items</button></th>
+          <th class="num"><button type="button" data-psort="hours">Active hours</button></th>
+          <th class="num"><button type="button" data-psort="iph">IPH</button></th>
+          <th class="num"><button type="button" data-psort="vs">vs target</button></th>
+          <th class="num"><button type="button" data-psort="atH">Hours at target</button></th>
+          <th class="num"><button type="button" data-psort="days">Days</button></th>
+                  </tr></thead>
+        <tbody id="pbody"></tbody>
+      </table>
+    </div>
+    <div class="foot"><span id="pcount"></span><button class="btn" id="pmore" type="button" hidden>Show 200 more</button></div>
+  </section>
+
   <!-- reservations -->
   <section class="sec rv" id="r-warehouses">
     <div><h2 class="h">Active reservations by warehouse</h2></div>
@@ -362,6 +434,12 @@ const SB_URL = 'https://zjqjdfbylnplwsavvonh.supabase.co';
 const SB_READ_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpqcWpkZmJ5bG5wbHdzYXZ2b25oIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTE5MDI1NzIsImV4cCI6MjEwNzQ3ODU3Mn0.KJxS5FHFpQz-eQGQzO8yI0il8uNPrjKfXAEBStfcmjk';
 const WAREHOUSES = ['CAIID01', 'CAIID02', 'CAIID03', 'CAIID04', 'CAIID05', 'CAIID06', 'CAIID07'];
 const CHECK_EVERY_SECONDS = 60;
+/* Attendance sheet with employee IDs and names (Google Sheet > File > Share > Publish to web > that tab > CSV).
+   An ID like MAK00453Y is matched to a username like mak00453you@... (vendor + employee number). */
+const ATTEND_SHEET_ID = '1GaMh4GIfanzEvJYpbtvuVLpawERz_-kRzSrWyqovpXs';
+const ATTEND_GID = '11379924';
+const ATTEND_CSV_URL = 'https://docs.google.com/spreadsheets/d/' + ATTEND_SHEET_ID + '/gviz/tq?tqx=out:csv&gid=' + ATTEND_GID;
+const ATTEND_CSV_URL_2 = 'https://docs.google.com/spreadsheets/d/' + ATTEND_SHEET_ID + '/export?format=csv&gid=' + ATTEND_GID;
 
 (function () {
   const F = d3.format(',');
@@ -378,7 +456,7 @@ const CHECK_EVERY_SECONDS = 60;
   ];
   const AGL = Object.fromEntries(AG.map((a) => [a.k, a.l]));
   const ageBucket = (d) => AG.find((a) => a.t(d)).k;
-  const st = { mode: 'pend', reason: 'All', rage: null, rsort: 'qty', rdir: -1, rshown: 200, whs: new Set(), from: '', to: '', status: 'All', ptype: 'All', food: 'All', q: '', age: null, sortKey: 'age', sortDir: -1, shown: 200 };
+  const st = { pday: null, pptype: 'All', psort: 'items', pdir: -1, pshown: 200, mode: 'pend', reason: 'All', rage: null, rsort: 'qty', rdir: -1, rshown: 200, whs: new Set(), from: '', to: '', status: 'All', ptype: 'All', food: 'All', q: '', age: null, sortKey: 'age', sortDir: -1, shown: 200 };
   const H = { apikey: SB_READ_KEY, Authorization: 'Bearer ' + SB_READ_KEY };
   const API = SB_URL + '/rest/v1/stocktake_snapshots?id=eq.3&select=';
   let RAW = null, L = [], lastAt = null, updatedLabel = '';
@@ -406,15 +484,31 @@ const CHECK_EVERY_SECONDS = 60;
     try {
       if (RAW && !force) {
         const r = await fetch(API + 'updated_at', { headers: H, cache: 'no-store' });
-        if (r.ok) { const j = await r.json(); if (j[0] && j[0].updated_at === lastAt) { await loadRes(); setLive('ok', 'LIVE'); build(); render(); return; } }
+        if (r.ok) { const j = await r.json(); if (j[0] && j[0].updated_at === lastAt) { await loadRes(); await loadProdLive(); setLive('ok', 'LIVE'); build(); render(); return; } }
       }
       const res = await fetch(API + 'updated_at,row_count,cols,rows', { headers: H, cache: 'no-store' });
       if (!res.ok) throw new Error('Supabase answered ' + res.status);
       const j = await res.json();
       if (!j[0]) { RAW = null; setLive('err', 'No data yet'); render('No data yet. Click the Refresh Putaway bookmark on grocery-tools.noon.team.'); return; }
       RAW = j[0]; lastAt = RAW.updated_at; updatedLabel = when(lastAt); $('#loadedAt').textContent = updatedLabel;
-      build(); fillSelects(); await loadRes(); setLive('ok', 'LIVE'); render();
+      build(); fillSelects(); await loadRes(); await loadProdLive(); setLive('ok', 'LIVE'); render();
     } catch (e) { setLive('err', 'Load failed'); if (!RAW) render('Could not load the data. ' + e.message); }
+  }
+  let prodAt = null;
+  async function loadProdLive() {
+    try {
+      const A = SB_URL + '/rest/v1/stocktake_snapshots?id=eq.5&select=';
+      const r = await fetch(A + 'updated_at', { headers: H, cache: 'no-store' }); if (!r.ok) return;
+      const j = await r.json(); if (!j[0] || j[0].updated_at === prodAt) return;
+      if (pMeta && !pMeta.live && pMeta.at > Date.parse(j[0].updated_at)) return; // a newer file you loaded yourself wins
+      const r2 = await fetch(A + 'updated_at,cols,rows', { headers: H, cache: 'no-store' }); if (!r2.ok) return;
+      const d = (await r2.json())[0]; if (!d) return;
+      const ix = Object.fromEntries(d.cols.map((c, i) => [c, i]));
+      P = d.rows.map((a) => ({ wh: String(a[ix.partner_warehouse_code] || '').trim(), user: String(a[ix.username] || '').trim(), ptype: String(a[ix.process_type] || '').trim(), day: String(a[ix.day] || '').slice(0, 10), hour: a[ix.hour] === '' || a[ix.hour] == null ? null : +a[ix.hour], items: +a[ix.putaway_items] || 0 }))
+        .filter((r) => r.wh && r.user && r.ptype.toLowerCase() === P_ONLY_TYPE);
+      const days = [...new Set(P.map((r) => r.day).filter(Boolean))].sort();
+      prodAt = d.updated_at; pMeta = { live: true, at: Date.parse(d.updated_at), files: ['live data'], from: days[0] || '', to: days[days.length - 1] || '' };
+    } catch (e) {}
   }
   async function loadRes() {
     try {
@@ -464,9 +558,10 @@ const CHECK_EVERY_SECONDS = 60;
     $('#flt').textContent = ex.length ? ' · ' + ex.join(' · ') : '';
     $('#exScope').textContent = 'Export: ' + (st.whs.size ? selList().join(', ') : 'all warehouses') + (ex.length ? ' (filtered)' : '');
     $('#tagAge').hidden = !st.age; $('#tagAge').textContent = st.age ? 'Age: ' + AGL[st.age] + ' ×' : '';
-    document.body.classList.toggle('mode-res', st.mode === 'res');
+    document.body.classList.toggle('mode-res', st.mode === 'res'); document.body.classList.toggle('mode-prod', st.mode === 'prod');
     document.querySelectorAll('[data-mode]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.mode === st.mode)));
     if (st.mode === 'res') { drawRes(); drawDr(); return; }
+    if (st.mode === 'prod') { drawProd(); drawDr(); return; }
     drawCards(emptyMsg); drawChips(); drawKpis(); drawAge(); drawTypes(); drawDays(); drawTable(emptyMsg); drawDr();
   }
   function drawCards(emptyMsg) {
@@ -560,6 +655,173 @@ const CHECK_EVERY_SECONDS = 60;
   function toCSV(rows) { if (!rows.length) return ''; const cols = Object.keys(rows[0]); const esc = (v) => { const s = v == null ? '' : String(v); return /[",\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s; }; return '\uFEFF' + [cols.join(','), ...rows.map((r) => cols.map((c) => esc(r[c])).join(','))].join('\n'); }
   function download(blob, name) { const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = name; document.body.append(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 1000); }
   // ---------- reservations view ----------
+  // ---------- putaway productivity (BigQuery report "Putaway productivity for users") ----------
+  const P_KEY = 'putaway_productivity_v1';
+  const P_ONLY_TYPE = 'inbound'; // productivity counts inbound putaway only
+  const P_TARGET = 1000; // items per user per hour
+  let P = [], pMeta = null;
+  try { const raw = localStorage.getItem(P_KEY); if (raw) { const o = JSON.parse(raw); P = (o.rows || []).filter((r) => r.ptype === P_ONLY_TYPE); pMeta = o.meta || null; } } catch (e) {}
+  function parseProd(text) {
+    const rows = d3.csvParse(text.replace(/^\uFEFF/, ''));
+    if (!['partner_warehouse_code', 'username', 'putaway_items'].every((c) => rows.columns.includes(c))) throw new Error('This is not the Putaway productivity export (needs partner_warehouse_code, username and putaway_items).');
+    return rows.map((r) => ({ wh: String(r.partner_warehouse_code || '').trim(), user: String(r.username || '').trim(), ptype: r.process_type || '—', day: String(r.day || '').slice(0, 10), hour: r.hour === '' || r.hour == null ? null : +r.hour, items: +r.putaway_items || 0 })).filter((r) => r.wh && r.user && String(r.ptype).trim().toLowerCase() === P_ONLY_TYPE);
+  }
+  async function loadProdFiles(files) {
+    try {
+      const all = []; for (const f of files) all.push(...parseProd(await f.text()));
+      // same row in two files (e.g. the same warehouse exported twice) is counted once
+      const seen = new Set(); P = all.filter((r) => { const k = [r.wh, r.user, r.ptype, r.day, r.hour, r.items].join('|'); if (seen.has(k)) return false; seen.add(k); return true; });
+      const days = [...new Set(P.map((r) => r.day).filter(Boolean))].sort();
+      pMeta = { at: Date.now(), files: files.map((f) => f.name), from: days[0] || '', to: days[days.length - 1] || '' };
+      try { localStorage.setItem(P_KEY, JSON.stringify({ meta: pMeta, rows: P })); } catch (e) { alert('The file is loaded but too big to keep after closing the page.'); }
+      fillPtype(); st.pshown = 200; render();
+    } catch (e) { alert(e.message); }
+  }
+  function fillPtype() { return; const s = $('#pptype'); const v = [...new Set(P.map((r) => r.ptype))].sort(); s.replaceChildren(new Option('All process types', 'All'), ...v.map((x) => new Option(x, x))); s.value = v.includes(st.pptype) ? st.pptype : 'All'; st.pptype = s.value; }
+  const prodView = (skip) => { const q = st.q.trim().toLowerCase(); return P.filter((r) => (skip === 'wh' || inWh(r.wh)) && (!st.from || (r.day && r.day >= st.from)) && (!st.to || (r.day && r.day <= st.to)) && (st.pptype === 'All' || r.ptype === st.pptype) && matchQ(q, r.user, nameOf(r.user))); };
+  // IPH = items / distinct (user, day, hour) slots; rows without day or hour count for items but not for hours
+  const pk = (v) => { const slots = new Set(v.filter((r) => r.day && r.hour != null).map((r) => r.user + '|' + r.day + '|' + r.hour)); const ud = new Set(v.filter((r) => r.day).map((r) => r.user + '|' + r.day)); const items = d3.sum(v, (r) => r.items); const slotItems = d3.sum(v.filter((r) => r.day && r.hour != null), (r) => r.items);
+    const per = d3.rollup(v.filter((r) => r.day && r.hour != null), (x) => d3.sum(x, (r) => r.items), (r) => r.user + '|' + r.day + '|' + r.hour); const atH = [...per.values()].filter((n) => n >= P_TARGET).length;
+    const uIph = d3.rollups(v.filter((r) => r.day && r.hour != null), (x) => d3.sum(x, (r) => r.items) / new Set(x.map((r) => r.day + '|' + r.hour)).size, (r) => r.user); const atUsers = uIph.filter(([, i]) => i >= P_TARGET).length;
+    return { atH, atHours: slots.size ? Math.round(100 * atH / slots.size) + '%' : '—', atUsers: uIph.length ? atUsers + ' / ' + uIph.length : '—', items, uh: slots.size, iph: slots.size ? Math.round(slotItems / slots.size) : 0, users: new Set(v.map((r) => r.user)).size, days: new Set(v.map((r) => r.day).filter(Boolean)).size, upd: ud.size ? Math.round(items / ud.size) : 0 }; };
+  const shortU = (u) => String(u).split('@')[0];
+  // ---------- employee names from the attendance sheet ----------
+  let NAMES = { full: new Map(), num: new Map() }, namesState = ATTEND_CSV_URL ? 'loading' : 'off';
+  const idKey = (raw) => { const m = String(raw || '').trim().match(/^([A-Za-z]+)0*(\d+)([A-Za-z]?)/); return m ? { num: m[1].toUpperCase() + Number(m[2]), full: m[1].toUpperCase() + Number(m[2]) + (m[3] || '').toUpperCase() } : null; };
+  const nameOf = (user) => { const k = idKey(shortU(user)); if (!k) return ''; return NAMES.full.get(k.full) || NAMES.num.get(k.num) || ''; };
+  async function loadNames() {
+    if (!ATTEND_CSV_URL) return;
+    try {
+      let text = null, why = '';
+      for (const u of [ATTEND_CSV_URL, ATTEND_CSV_URL_2]) {
+        try { const r = await fetch(u + '&_=' + Date.now(), { cache: 'no-store' }); const t = await r.text(); if (r.ok && !/^\s*</.test(t)) { text = t; break; } why = 'answered ' + r.status + (/^\s*</.test(t) ? ', sheet is not shared' : ''); } catch (e) { why = 'blocked (sheet is not shared with anyone with the link)'; }
+      }
+      if (text == null) throw new Error(why);
+      const rows = d3.csvParseRows(text.replace(/^\uFEFF/, ''));
+      const hi = rows.findIndex((x) => x.some((c) => /^\s*id\s*$/i.test(c)) && x.some((c) => /name/i.test(c)));
+      if (hi < 0) throw new Error('no ID and Name columns found');
+      const ci = rows[hi].findIndex((c) => /^\s*id\s*$/i.test(c)), ni = rows[hi].findIndex((c) => /name/i.test(c));
+      const full = new Map(), num = new Map();
+      rows.slice(hi + 1).forEach((x) => { const k = idKey(x[ci]); const n = String(x[ni] || '').trim(); if (!k || !n) return; full.set(k.full, n); if (!num.has(k.num)) num.set(k.num, n); });
+      NAMES = { full, num }; namesState = 'ok:' + full.size;
+    } catch (e) { namesState = 'err:' + e.message; }
+    if (st.mode === 'prod') render();
+  }
+  function drawProd() {
+    const ex = []; if (st.from || st.to) ex.push('days ' + (st.from || 'start') + ' → ' + (st.to || 'today')); if (st.pptype !== 'All') ex.push(st.pptype); if (st.q.trim()) ex.push('search "' + st.q.trim() + '"');
+    $('#selName').textContent = scopeName(); $('#flt').textContent = ' · productivity' + (ex.length ? ' · ' + ex.join(' · ') : '');
+    $('#exScope').textContent = 'Export: ' + (st.whs.size ? selList().join(', ') : 'all warehouses') + ' productivity' + (ex.length ? ' (filtered)' : '');
+    $('#tagAge').hidden = true;
+    $('#pInfo').textContent = (namesState.startsWith('ok') ? 'Names from attendance sheet (' + namesState.slice(3) + ' employees) · ' : namesState.startsWith('err') ? 'Attendance sheet could not load (' + namesState.slice(4) + ') · ' : '') + (pMeta ? `Inbound only · ${pMeta.live ? 'live, from the Refresh Productivity bookmark' : 'loaded ' + pMeta.files.join(', ')} · days ${pMeta.from} → ${pMeta.to} · ${when(pMeta.at)}${pMeta.live ? '' : ' · kept in this browser only'}` : 'No productivity file yet. Export it from BigQuery Reports > Putaway productivity for users, download it from BigQuery Jobs, then click "Load productivity CSV".');
+    const all = prodView('wh');
+    $('#pcards').replaceChildren(...WAREHOUSES.map((wh) => {
+      const k = pk(all.filter((r) => r.wh === wh));
+      const b = el('button', 'card'); b.type = 'button'; b.dataset.wh = wh; b.setAttribute('aria-pressed', String(st.whs.has(wh)));
+      const top = el('div', 'card-top'); const sk = el('span', 'skus'); const ib = el('b', '', F(k.iph)); if (k.uh) ib.style.color = k.iph >= P_TARGET ? 'var(--g)' : 'var(--r)'; sk.append(ib, ' IPH'); top.append(el('span', 'wh', wh), sk);
+      const mini = el('div', 'mini'); const part = (x, label) => { const sp = el('span'); sp.append(el('b', '', F(x)), ' ' + label); return sp; };
+      mini.append(part(k.users, 'users'), part(k.uh, 'user-hours'), part(k.atH, 'hours at target'));
+      b.append(top, el('div', 'big', F(k.items)), el('div', 'lbl', 'Items put away'), mini); return b;
+    }));
+    const cnt = d3.rollup(all, (v) => d3.sum(v, (r) => r.items), (r) => r.wh);
+    const mk = (w, label, n) => { const b = el('button', 'chip', label); b.append(el('span', 'n', F(n))); b.type = 'button'; b.dataset.wh = w; b.setAttribute('aria-pressed', String(w === 'All' ? !st.whs.size : st.whs.has(w))); return b; };
+    $('#chips').replaceChildren(mk('All', 'All warehouses', d3.sum(all, (r) => r.items)), ...WAREHOUSES.map((w) => mk(w, w, cnt.get(w) || 0)));
+    const v = prodView(); const k = pk(v);
+    document.querySelectorAll('#pkpis [data-p]').forEach((e) => { const x = k[e.dataset.p]; e.textContent = P.length ? (typeof x === 'number' ? F(x) : x) : '—'; if (e.dataset.p === 'iph') e.style.color = P.length ? (x >= P_TARGET ? 'var(--g)' : 'var(--r)') : ''; });
+    // by day
+    const dbox = $('#pDay'); dbox.replaceChildren();
+    const days = [...new Set(v.map((r) => r.day).filter(Boolean))].sort();
+    if (!days.length) dbox.append(el('div', 'msg', P.length ? 'No rows for these filters.' : 'No data yet.'));
+    else {
+      const dd = days.map((d) => { const x = pk(v.filter((r) => r.day === d)); return [d, x.items, x.iph]; });
+      const W = Math.max(300, dbox.clientWidth), Hh = 210, m = { t: 30, r: 8, b: 26, l: 8 };
+      const x = d3.scaleBand(days, [m.l, W - m.r]).padding(0.2); const y = d3.scaleLinear([0, d3.max(dd, (d) => d[1]) || 1], [Hh - m.b, m.t]);
+      const svg = d3.select(dbox).append('svg').attr('width', '100%').attr('viewBox', `0 0 ${W} ${Hh}`).attr('height', Hh).attr('role', 'img').attr('aria-label', 'Items by day');
+      svg.selectAll('rect').data(dd).join('rect').attr('x', (d) => x(d[0])).attr('width', x.bandwidth()).attr('y', (d) => y(d[1])).attr('height', (d) => y(0) - y(d[1])).attr('rx', 3).style('fill', 'var(--b)').append('title').text((d) => d[0] + ': ' + F(d[1]) + ' items · ' + F(d[2]) + ' IPH');
+      svg.selectAll('text.v').data(dd).join('text').attr('x', (d) => x(d[0]) + x.bandwidth() / 2).attr('y', (d) => y(d[1]) - 16).attr('text-anchor', 'middle').attr('font-size', 10.5).attr('font-weight', 700).style('fill', 'var(--fg)').text((d) => (x.bandwidth() > 34 ? d3.format('~s')(d[1]) : ''));
+      svg.selectAll('text.i').data(dd).join('text').attr('x', (d) => x(d[0]) + x.bandwidth() / 2).attr('y', (d) => y(d[1]) - 4).attr('text-anchor', 'middle').attr('font-size', 10).attr('font-weight', 700).style('fill', (d) => (d[2] >= P_TARGET ? 'var(--g)' : 'var(--r)')).text((d) => (x.bandwidth() > 34 ? F(d[2]) + ' IPH' : ''));
+      svg.selectAll('text.d').data(days).join('text').attr('x', (d) => x(d) + x.bandwidth() / 2).attr('y', Hh - 8).attr('text-anchor', 'middle').attr('font-size', 10.5).style('fill', 'var(--muted)').text((d) => d.slice(5));
+    }
+    // IPH by hour of day, with the target line
+    const hbox = $('#pHour'); hbox.replaceChildren();
+    if (v.some((r) => r.hour != null)) {
+      const hh = d3.range(24).map((h) => { const x = pk(v.filter((r) => r.hour === h)); return [h, x.iph, x.items, x.users]; });
+      const W = Math.max(300, hbox.clientWidth), Hh = 210, m = { t: 22, r: 8, b: 26, l: 8 };
+      const x = d3.scaleBand(d3.range(24), [m.l, W - m.r]).padding(0.15); const y = d3.scaleLinear([0, Math.max(P_TARGET * 1.2, d3.max(hh, (d) => d[1]) || 1)], [Hh - m.b, m.t]);
+      const svg = d3.select(hbox).append('svg').attr('width', '100%').attr('viewBox', `0 0 ${W} ${Hh}`).attr('height', Hh).attr('role', 'img').attr('aria-label', 'IPH by hour');
+      svg.selectAll('rect').data(hh).join('rect').attr('x', (d) => x(d[0])).attr('width', x.bandwidth()).attr('y', (d) => y(d[1])).attr('height', (d) => y(0) - y(d[1])).attr('rx', 3).style('fill', (d) => (d[1] >= P_TARGET ? 'var(--g)' : d[1] >= 700 ? 'var(--o)' : 'var(--r)')).style('fill-opacity', (d) => (d[2] ? 1 : 0)).append('title').text((d) => String(d[0]).padStart(2, '0') + ':00 · ' + F(d[1]) + ' IPH · ' + F(d[2]) + ' items · ' + F(d[3]) + ' users');
+      svg.append('line').attr('x1', m.l).attr('x2', W - m.r).attr('y1', y(P_TARGET)).attr('y2', y(P_TARGET)).style('stroke', 'var(--y)').style('stroke-dasharray', '5 4').style('stroke-width', 1.5);
+      svg.append('text').attr('x', W - m.r).attr('y', y(P_TARGET) - 4).attr('text-anchor', 'end').attr('font-size', 11).attr('font-weight', 700).style('fill', 'var(--y)').text('Target ' + F(P_TARGET));
+      svg.selectAll('text.d').data(d3.range(24)).join('text').attr('x', (d) => x(d) + x.bandwidth() / 2).attr('y', Hh - 8).attr('text-anchor', 'middle').attr('font-size', 10.5).style('fill', 'var(--muted)').text((d) => (x.bandwidth() > 14 || d % 3 === 0 ? String(d).padStart(2, '0') : ''));
+    } else hbox.append(el('div', 'msg', P.length ? 'No rows for these filters.' : 'No data yet.'));
+    drawHeat(v);
+    // users
+    const us = d3.rollups(v, (x) => ({ ...pk(x), types: [...new Set(x.map((r) => r.ptype))].join(', ') }), (r) => r.wh, (r) => r.user).flatMap(([wh, a]) => a.map(([user, o]) => ({ wh, name: nameOf(user), user: shortU(user), full: user, items: o.items, hours: o.uh, iph: o.iph, vs: o.iph / P_TARGET, atH: o.atH, days: o.days, types: o.types })));
+    us.sort((a, b) => { const va = a[st.psort], vb = b[st.psort]; const c = typeof va === 'number' ? va - vb : String(va).localeCompare(String(vb)); return c * st.pdir || b.items - a.items; });
+    document.querySelectorAll('#ptbl th').forEach((th) => { const kk = th.querySelector('button').dataset.psort; if (kk === st.psort) th.setAttribute('aria-sort', st.pdir > 0 ? 'ascending' : 'descending'); else th.removeAttribute('aria-sort'); });
+    $('#ptbl').classList.toggle('single', st.whs.size === 1);
+    const frag = document.createDocumentFragment();
+    us.slice(0, st.pshown).forEach((u) => { const tr = el('tr'); const td = (c, x) => tr.append(el('td', c, x)); td('c-wh colwh', u.wh); tr.append(el('td', 'c-title', u.name || '—')); const c = el('td', 'c-sku', u.full); tr.append(c); td('num', F(u.items)); td('num', F(u.hours)); td('num ' + (u.iph >= P_TARGET ? 'ok' : 'low'), F(u.iph)); td('num ' + (u.iph >= P_TARGET ? 'ok' : 'low'), Math.round(100 * u.iph / P_TARGET) + '%'); td('num', F(u.atH) + ' / ' + F(u.hours)); td('num', F(u.days)); frag.append(tr); });
+    $('#pbody').replaceChildren(frag);
+    $('#pcount').textContent = us.length ? `Showing ${F(Math.min(st.pshown, us.length))} of ${F(us.length)} users` : '';
+    $('#pmore').hidden = us.length <= st.pshown;
+    S_prodUsers = us;
+  }
+  let S_prodUsers = [], S_heat = [];
+  const cls = (n) => (n >= P_TARGET ? 'ok' : n >= 700 ? 'mid' : 'low');
+  function drawHeat(v) {
+    const days = [...new Set(v.map((r) => r.day).filter(Boolean))].sort();
+    const sel = $('#pday'); const cur = st.pday;
+    sel.replaceChildren(new Option('All days (average per hour worked)', 'all'), ...days.slice().reverse().map((d) => new Option(d, d)));
+    sel.value = cur && (cur === 'all' || days.includes(cur)) ? cur : (days[days.length - 1] || 'all'); // default: latest day
+    const day = sel.value; const vv = v.filter((r) => r.day && r.hour != null && (day === 'all' || r.day === day));
+    // per user and hour: items in that hour (one day) or average items per day worked at that hour (all days)
+    const byU = d3.rollups(vv, (x) => {
+      const h = new Map(); d3.rollups(x, (y) => d3.sum(y, (r) => r.items), (r) => r.hour, (r) => r.day).forEach(([hr, arr]) => { h.set(hr, Math.round(d3.mean(arr, (a) => a[1]))); });
+      const slots = d3.rollups(x, (y) => d3.sum(y, (r) => r.items), (r) => r.day + '|' + r.hour).map((a) => a[1]);
+      return { h, items: d3.sum(x, (r) => r.items), hours: slots.length, iph: slots.length ? Math.round(d3.sum(slots) / slots.length) : 0, atH: slots.filter((n) => n >= P_TARGET).length, whs: [...new Set(x.map((r) => r.wh))].join(', ') };
+    }, (r) => r.user).map(([user, o]) => ({ user, name: nameOf(user), ...o })).sort((a, b) => b.iph - a.iph);
+    const hrs = d3.range(24).filter((h) => vv.some((r) => r.hour === h));
+    const hr = el('tr'); hr.append(el('th', 'plain colwh', 'Warehouse'), el('th', 'plain', 'Name'), el('th', 'plain', 'Username'), ...hrs.map((h) => el('th', 'plain h', String(h).padStart(2, '0'))), el('th', 'plain num', 'Items'), el('th', 'plain num', 'Hours'), el('th', 'plain num', 'IPH'), el('th', 'plain num', 'At target'));
+    $('#hmhead').replaceChildren(hr);
+    const frag = document.createDocumentFragment();
+    byU.forEach((u) => {
+      const tr = el('tr'); tr.append(el('td', 'c-wh colwh', u.whs), el('td', 'c-title', u.name || '—'), el('td', 'c-sku', u.user));
+      hrs.forEach((h) => { const n = u.h.get(h); const c = el('td', 'h' + (n != null ? ' ' + cls(n) : ''), n != null ? F(n) : ''); if (n != null) c.title = u.user + ' · ' + String(h).padStart(2, '0') + ':00 · ' + F(n) + ' items'; tr.append(c); });
+      tr.append(el('td', 'num', F(u.items)), el('td', 'num', F(u.hours)), el('td', 'num ' + (u.iph >= P_TARGET ? 'ok' : 'low'), F(u.iph)), el('td', 'num', F(u.atH) + ' / ' + F(u.hours)));
+      frag.append(tr);
+    });
+    $('#hmbody').replaceChildren(frag);
+    $('#hmtbl').classList.toggle('single', st.whs.size === 1);
+    $('#hmcount').textContent = byU.length ? `${F(byU.length)} users · ${day === 'all' ? 'all days, average items per hour worked' : day} · target ${F(P_TARGET)} items per hour` : (P.length ? 'No rows for these filters.' : '');
+    S_heat = { day, hrs, rows: byU };
+  }
+  $('#pLoad').addEventListener('click', () => { $('#pFile').value = ''; $('#pFile').click(); });
+  $('#pFile').addEventListener('change', (e) => { const f = [...e.target.files]; if (f.length) loadProdFiles(f); });
+  document.addEventListener('dragover', (e) => { if (st.mode === 'prod') e.preventDefault(); });
+  document.addEventListener('drop', (e) => { if (st.mode !== 'prod') return; e.preventDefault(); const f = [...e.dataTransfer.files].filter((x) => /\.csv$/i.test(x.name)); if (f.length) loadProdFiles(f); });
+  $('#pmore').addEventListener('click', () => { st.pshown += 200; render(); });
+  $('#pday').addEventListener('change', (e) => { st.pday = e.target.value; render(); });
+  $('#pcards').addEventListener('click', (e) => { const b = e.target.closest('button[data-wh]'); if (b) toggleWh(b.dataset.wh); });
+  $('#ptbl thead').addEventListener('click', (e) => { const b = e.target.closest('button[data-psort]'); if (!b) return; const k = b.dataset.psort; if (k === st.psort) st.pdir = -st.pdir; else { st.psort = k; st.pdir = ['items', 'hours', 'iph', 'days', 'vs', 'atH'].includes(k) ? -1 : 1; } render(); });
+  const prodUsersOut = () => S_prodUsers.map((u) => ({ Warehouse: u.wh, Name: u.name, Username: u.full, Items: u.items, 'Active hours': u.hours, IPH: u.iph, 'vs target (1,000)': Math.round(100 * u.iph / P_TARGET) + '%', 'Hours at target': u.atH, Days: u.days }));
+  $('#exCsv').addEventListener('click', (e) => { if (st.mode !== 'prod') return; e.stopImmediatePropagation(); const r = prodUsersOut(); if (!r.length) { alert('No productivity rows for these filters.'); return; } download(new Blob([toCSV(r)], { type: 'text/csv;charset=utf-8' }), `Putaway_productivity_${scopeFile()}_${stamp()}.csv`); });
+  $('#exXlsx').addEventListener('click', (e) => {
+    if (st.mode !== 'prod') return; e.stopImmediatePropagation();
+    if (!P.length) { alert('Load the productivity CSV first.'); return; }
+    if (!window.XLSX) { alert('Excel export could not load. Check your connection and try again.'); return; }
+    const wb = XLSX.utils.book_new(); const add = (name, rows) => { const ws = XLSX.utils.json_to_sheet(rows.length ? rows : [{ Note: 'No rows' }]); XLSX.utils.book_append_sheet(wb, ws, name); };
+    const v = prodView(); const whs = st.whs.size ? selList() : WAREHOUSES;
+    const sum = whs.map((w) => { const k = pk(v.filter((r) => r.wh === w)); return { Warehouse: w, Items: k.items, IPH: k.iph, 'Active users': k.users, 'User-hours': k.uh, 'Items per user per day': k.upd }; });
+    if (whs.length > 1) { const k = pk(v); sum.push({ Warehouse: 'Total', Items: k.items, IPH: k.iph, 'Active users': k.users, 'User-hours': k.uh, 'Items per user per day': k.upd }); }
+    add('Warehouses', sum); add('Users', prodUsersOut());
+    add('By day', [...new Set(v.map((r) => r.day).filter(Boolean))].sort().map((d) => { const k = pk(v.filter((r) => r.day === d)); return { Day: d, Items: k.items, IPH: k.iph, 'Active users': k.users, 'User-hours': k.uh }; }));
+    add('By hour', d3.range(24).map((h) => { const k = pk(v.filter((r) => r.hour === h)); return { Hour: String(h).padStart(2, '0') + ':00', Items: k.items, IPH: k.iph, 'Active users': k.users }; }));
+    if (S_heat.rows && S_heat.rows.length) add('Hourly by user', S_heat.rows.map((u) => { const o = { Warehouse: u.whs, Name: u.name, Username: u.user }; S_heat.hrs.forEach((h) => { o[String(h).padStart(2, '0') + ':00'] = u.h.get(h) ?? ''; }); return { ...o, Items: u.items, Hours: u.hours, IPH: u.iph, 'Hours at target': u.atH, Day: S_heat.day === 'all' ? 'All days (average)' : S_heat.day }; }));
+    add('Raw', v.map((r) => ({ Warehouse: r.wh, Name: nameOf(r.user), Username: r.user, 'Process type': r.ptype, Day: r.day, Hour: r.hour, Items: r.items, 'At target (1,000)': r.hour == null ? '' : r.items >= P_TARGET ? 'Yes' : 'No' })));
+    XLSX.writeFile(wb, `Putaway_productivity_${scopeFile()}_${stamp()}.xlsx`);
+  });
+  if (P.length) fillPtype();
+
   const resView = (skip) => {
     const q = st.q.trim().toLowerCase();
     return R.filter((r) => (skip === 'wh' || inWh(r.wh)) && (!st.from || r.day >= st.from) && (!st.to || r.day <= st.to) && (skip === 'reason' || st.reason === 'All' || r.reason === st.reason) && (skip === 'age' || !st.rage || r.ab === st.rage) && matchQ(q, r.loc, r.bar, r.user, r.reason));
@@ -690,6 +952,7 @@ const CHECK_EVERY_SECONDS = 60;
   setHdr();
   let rt; window.addEventListener('resize', () => { clearTimeout(rt); rt = setTimeout(() => { setHdr(); if (RAW) { drawTypes(); drawDays(); } }, 150); });
   load(true);
+  loadNames(); setInterval(() => { if (!document.hidden) loadNames(); }, 30 * 60000);
   setInterval(() => { if (!document.hidden) load(false); }, CHECK_EVERY_SECONDS * 1000);
   document.addEventListener('visibilitychange', () => { if (!document.hidden && RAW) load(false); });
 })();
