@@ -756,11 +756,11 @@ const ATTEND_CSV_URL_2 = 'https://docs.google.com/spreadsheets/d/' + ATTEND_SHEE
   const empOf = (user) => { const k = idKey(shortU(user)); if (!k) return null; return NAMES.full.get(k.full) || NAMES.noLetter.get(k.num) || null; };
   const nameOf = (user) => { const e = empOf(user); return e ? e.name : ''; };
   // tenure = days from the hiring date in the attendance sheet until today
-  const TEN = [{ k: 't0', l: '0–30 days', max: 30 }, { k: 't1', l: '1–3 months', max: 90 }, { k: 't3', l: '3–6 months', max: 180 }, { k: 't6', l: '6–12 months', max: 365 }, { k: 't12', l: 'Over 1 year', max: Infinity }];
+  const TEN = [{ k: 't1', l: '1–6 days', max: 6 }, { k: 't7', l: '7–14 days', max: 14 }, { k: 't15', l: '15–30 days', max: 30 }, { k: 't31', l: 'More than 1 month', max: Infinity }]; // day 0 (hired today) counts in 1–6
   const TENL = Object.fromEntries([...TEN.map((t) => [t.k, t.l]), ['tu', 'Hiring date unknown']]);
   const tenureDays = (user) => { const e = empOf(user); if (!e || !e.hire) return null; return Math.max(0, Math.floor((Date.now() - e.hire) / 864e5)); };
   const tenureKey = (user) => { const d = tenureDays(user); if (d == null) return 'tu'; return TEN.find((t) => d <= t.max).k; };
-  const tenureLabel = (d) => (d == null ? '—' : d < 60 ? d + ' days' : d < 730 ? Math.round(d / 30.4) + ' months' : (d / 365).toFixed(1) + ' years');
+  const tenureLabel = (d) => (d == null ? '—' : d < 60 ? d + (d === 1 ? ' day' : ' days') : d < 730 ? Math.round(d / 30.4) + ' months' : (d / 365).toFixed(1) + ' years');
   const MON = { jan: 0, feb: 1, mar: 2, apr: 3, may: 4, jun: 5, jul: 6, aug: 7, sep: 8, oct: 9, nov: 10, dec: 11 };
   function parseHire(v) {
     v = String(v || '').trim(); if (!v) return null; let m;
@@ -856,7 +856,7 @@ const ATTEND_CSV_URL_2 = 'https://docs.google.com/spreadsheets/d/' + ATTEND_SHEE
     document.querySelectorAll('#ptbl th').forEach((th) => { const kk = th.querySelector('button').dataset.psort; if (kk === st.psort) th.setAttribute('aria-sort', st.pdir > 0 ? 'ascending' : 'descending'); else th.removeAttribute('aria-sort'); });
     $('#ptbl').classList.toggle('single', st.whs.size === 1);
     const frag = document.createDocumentFragment();
-    us.slice(0, st.pshown).forEach((u) => { const tr = el('tr'); const td = (c, x) => tr.append(el('td', c, x)); td('c-wh colwh', u.wh); tr.append(el('td', 'c-sku', u.eid || '—')); tr.append(el('td', 'c-title', moodOf(u.iph) + ' ' + (u.name || '—'))); { const t = el('td', 'num', tenureLabel(u.ten)); if (u.ten != null && u.ten <= 30) t.style.color = 'var(--b)'; tr.append(t); } const c = el('td', 'c-sku', u.full); tr.append(c); td('num', F(u.items)); td('num', F(u.hours)); td('num ' + (u.iph >= P_TARGET ? 'ok' : 'low'), F(u.iph)); td('num ' + (u.iph >= P_TARGET ? 'ok' : 'low'), Math.round(100 * u.iph / P_TARGET) + '%'); td('num', F(u.atH) + ' / ' + F(u.hours)); td('num', F(u.days)); frag.append(tr); });
+    us.slice(0, st.pshown).forEach((u) => { const tr = el('tr'); const td = (c, x) => tr.append(el('td', c, x)); td('c-wh colwh', u.wh); tr.append(el('td', 'c-sku', u.eid || '—')); tr.append(el('td', 'c-title', moodOf(u.iph) + ' ' + (u.name || '—'))); { const t = el('td', 'num', tenureLabel(u.ten)); if (u.ten != null && u.ten <= 14) t.style.color = 'var(--b)'; tr.append(t); } const c = el('td', 'c-sku', u.full); tr.append(c); td('num', F(u.items)); td('num', F(u.hours)); td('num ' + (u.iph >= P_TARGET ? 'ok' : 'low'), F(u.iph)); td('num ' + (u.iph >= P_TARGET ? 'ok' : 'low'), Math.round(100 * u.iph / P_TARGET) + '%'); td('num', F(u.atH) + ' / ' + F(u.hours)); td('num', F(u.days)); frag.append(tr); });
     $('#pbody').replaceChildren(frag);
     $('#pcount').textContent = us.length ? `Showing ${F(Math.min(st.pshown, us.length))} of ${F(us.length)} users` : '';
     $('#pmore').hidden = us.length <= st.pshown;
