@@ -190,25 +190,42 @@ body.mode-prod .rv-or-pv{display:none!important}
 .hm td.mid{background:rgba(255,181,71,.18);color:var(--o);font-weight:700}
 .hm td.low{background:rgba(248,113,113,.18);color:var(--r);font-weight:700}
 td.num.ok{color:var(--g);font-weight:800} td.num.low{color:var(--r);font-weight:800}
-.lb{display:grid;gap:8px}
-.lbr{display:grid;grid-template-columns:34px 1fr auto;gap:10px;align-items:center;background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:10px 12px}
-.lbr .md{font-size:24px;line-height:1;text-align:center}
-.lbr .nm{font-weight:800;font-size:14px;line-height:1.25}
-.lbr .sb{font-size:11.5px;color:var(--muted);word-break:break-all}
-.lbr .vl{text-align:right;font-weight:800;font-size:18px}
-.lbr .vl small{display:block;font-size:11px;font-weight:600;color:var(--muted)}
-.lbr.top1{border-color:#ffd54a;background:linear-gradient(90deg,rgba(255,213,74,.16),var(--panel2))}
-.lbr.bad .vl{color:var(--r)} .lbr.good .vl{color:var(--g)}
-.hlgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,360px),1fr));gap:12px}
-.hcard{background:var(--panel2);border:1px solid var(--line);border-radius:14px;padding:12px;display:grid;gap:10px}
-.hcard .hh{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
-.hcard .hh b{font-size:18px}
-.hcols{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.hcols h4{margin:0 0 4px;font-size:11px;letter-spacing:.05em;text-transform:uppercase}
-.hl{list-style:none;margin:0;padding:0;display:grid;gap:4px;font-size:12.5px}
-.hl li{display:grid;grid-template-columns:20px 1fr auto;gap:6px;align-items:center}
-.hl li span:nth-child(2){overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.hl li b{font-variant-numeric:tabular-nums}
+/* leaderboard */
+.av{width:44px;height:44px;border-radius:50%;display:grid;place-items:center;font-weight:800;font-size:15px;color:var(--yink);background:var(--y);flex:none}
+.av.sm{width:34px;height:34px;font-size:12.5px}
+.av.red{background:rgba(248,113,113,.18);color:var(--r);box-shadow:0 0 0 2px var(--r) inset}
+.podium{display:grid;grid-template-columns:1fr 1.15fr 1fr;gap:10px;align-items:end}
+.pod{background:var(--panel2);border:1px solid var(--line);border-radius:16px;padding:14px 10px 12px;display:grid;justify-items:center;gap:6px;text-align:center;position:relative}
+.pod .md{font-size:30px;line-height:1}
+.pod .nm{font-weight:800;font-size:13.5px;line-height:1.25;max-width:100%;overflow:hidden;text-overflow:ellipsis;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.pod .sb{font-size:11px;color:var(--muted)}
+.pod .iph{font-size:24px;font-weight:800;color:var(--g);line-height:1}
+.pod .iph small{display:block;font-size:10.5px;font-weight:700;color:var(--muted);margin-top:3px;letter-spacing:.04em;text-transform:uppercase}
+.pod.p1{padding-top:22px;border-color:#ffd54a;background:linear-gradient(180deg,rgba(255,213,74,.18),var(--panel2) 70%)}
+.pod.p1 .av{width:56px;height:56px;font-size:18px;box-shadow:0 0 0 3px #ffd54a}
+.pod.p2 .av{background:#cfd8e3}.pod.p3 .av{background:#e0a56b}
+.lrows{display:grid;gap:8px;margin-top:10px}
+.lrow{display:grid;grid-template-columns:28px auto 1fr auto;gap:10px;align-items:center;background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:9px 12px}
+.lrow .rk{font-weight:800;color:var(--muted);text-align:center}
+.lrow .who{min-width:0}
+.lrow .nm{font-weight:700;font-size:13.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.lrow .sb{font-size:11px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.lrow .vl{text-align:right;font-weight:800;font-size:16px;font-variant-numeric:tabular-nums}
+.lrow .vl small{display:block;font-size:10.5px;color:var(--muted);font-weight:600}
+.prog{height:6px;border-radius:99px;background:var(--line);overflow:hidden;margin-top:6px}
+.prog i{display:block;height:100%;border-radius:99px}
+.lrow.bad .vl{color:var(--r)} .lrow.good .vl{color:var(--g)}
+/* best / worst by hour */
+.hltbl td{vertical-align:middle}
+.hltbl td.hr{font-weight:800;font-size:15px;white-space:nowrap}
+.hltbl .avgc{min-width:130px}
+.hltbl .avgc b{font-variant-numeric:tabular-nums}
+.chips2{display:flex;flex-wrap:wrap;gap:5px}
+.pc{display:inline-flex;align-items:center;gap:5px;border-radius:999px;padding:3px 9px 3px 6px;font-size:12px;font-weight:600;white-space:nowrap;max-width:230px}
+.pc span{overflow:hidden;text-overflow:ellipsis}
+.pc b{font-variant-numeric:tabular-nums}
+.pc.g{background:rgba(52,211,153,.12);color:var(--fg);border:1px solid rgba(52,211,153,.35)} .pc.g b{color:var(--g)}
+.pc.r{background:rgba(248,113,113,.10);color:var(--fg);border:1px solid rgba(248,113,113,.35)} .pc.r b{color:var(--r)}
 .legend{display:flex;gap:12px;flex-wrap:wrap;font-size:12px;color:var(--muted)}
 .legend i{display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:5px;vertical-align:-2px}
 </style>
@@ -229,7 +246,7 @@ td.num.ok{color:var(--g);font-weight:800} td.num.low{color:var(--r);font-weight:
   </div>
   <nav class="nav" aria-label="Sections">
     <a class="pv" href="#warehouses">Overview</a><a class="pv" href="#aging">Aging</a><a class="pv" href="#types">Process types</a><a class="pv" href="#daily">By day</a><a class="pv" href="#jobsec">Jobs</a>
-    <a class="qv" href="#p-warehouses">Overview</a><a class="qv" href="#p-days">By day</a><a class="qv" href="#p-hours">By hour</a><a class="qv" href="#p-top">Top 5</a><a class="qv" href="#p-hourly">Hourly by user</a><a class="qv" href="#p-hlead">Best & worst by hour</a><a class="qv" href="#p-users">Users</a>
+    <a class="qv" href="#p-warehouses">Overview</a><a class="qv" href="#p-days">By day</a><a class="qv" href="#p-hours">By hour</a><a class="qv" href="#p-top">Top 5</a><a class="qv" href="#p-tenure">Tenure</a><a class="qv" href="#p-hourly">Hourly by user</a><a class="qv" href="#p-hlead">Best & worst by hour</a><a class="qv" href="#p-users">Users</a>
     <a class="rv" href="#r-warehouses">Overview</a><a class="rv" href="#r-aging">Aging</a><a class="rv" href="#r-reasons">Reasons</a><a class="rv" href="#r-sec">Reservations</a>
   </nav>
 </header>
@@ -271,6 +288,7 @@ td.num.ok{color:var(--g);font-weight:800} td.num.low{color:var(--r);font-weight:
     <div class="sel qv">
       <span class="pill">Process type <b>inbound</b></span>
       <select class="in" id="phour" aria-label="Hour"><option value="All">All hours</option></select>
+      <select class="in" id="pten" aria-label="Employee tenure"><option value="All">All tenures</option></select>
       <button class="btn yb" id="pLoad" type="button">Load productivity CSV</button>
       <input type="file" id="pFile" accept=".csv,text/csv" multiple hidden>
     </div>
@@ -374,6 +392,10 @@ td.num.ok{color:var(--g);font-weight:800} td.num.low{color:var(--r);font-weight:
       <div class="lb" id="pAttn"></div>
     </section>
   </div>
+  <section class="panel qv" id="p-tenure">
+    <div class="ph"><div class="ico" style="--ic:rgba(167,139,250,.16);--icc:var(--p)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg></div><div><h2 class="h">IPH by employee tenure</h2><p class="note" id="tenNote"></p></div></div>
+    <div class="exrows" id="pTen"></div>
+  </section>
   <section class="panel qv" id="p-days">
     <div class="ph"><div class="ico" style="--ic:rgba(52,211,153,.14);--icc:var(--g)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg></div><div><h2 class="h">Items and IPH by day</h2></div></div>
     <div class="chart" id="pDay"></div>
@@ -395,7 +417,8 @@ td.num.ok{color:var(--g);font-weight:800} td.num.low{color:var(--r);font-weight:
   </section>
   <section class="panel qv" id="p-hlead">
     <div class="ph"><div class="ico" style="--ic:rgba(52,211,153,.14);--icc:var(--g)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="8"/><path d="M12 8v4l3 2"/></svg></div><div><h2 class="h">Best 5 and worst 5 every hour</h2><p class="note" id="hlNote"></p></div></div>
-    <div class="hlgrid" id="hlGrid"></div>
+    <div class="tablewrap" style="max-height:640px"><table class="hltbl"><thead><tr><th class="plain">Hour</th><th class="plain">Avg items</th><th class="plain num">At target</th><th class="plain">🏆 Best 5</th><th class="plain">⚠️ Worst 5</th></tr></thead><tbody id="hlGrid"></tbody></table></div>
+    <div class="foot"><span id="hlCount"></span><button class="btn" id="hlMore" type="button" hidden>Show all hours</button></div>
   </section>
   <section class="panel qv" id="p-users">
     <div class="ph"><div class="ico" style="--ic:rgba(167,139,250,.16);--icc:var(--p)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c1-4 4-6 8-6s7 2 8 6"/></svg></div><div><h2 class="h">Users</h2></div></div>
@@ -403,7 +426,9 @@ td.num.ok{color:var(--g);font-weight:800} td.num.low{color:var(--r);font-weight:
       <table id="ptbl">
         <thead><tr>
           <th class="colwh"><button type="button" data-psort="wh">Warehouse</button></th>
+          <th><button type="button" data-psort="eid">Employee ID</button></th>
           <th><button type="button" data-psort="name">Name</button></th>
+          <th class="num"><button type="button" data-psort="ten">Tenure</button></th>
           <th><button type="button" data-psort="user">Username</button></th>
           <th class="num"><button type="button" data-psort="items">Items</button></th>
           <th class="num"><button type="button" data-psort="hours">Active hours</button></th>
@@ -490,7 +515,7 @@ const ATTEND_CSV_URL_2 = 'https://docs.google.com/spreadsheets/d/' + ATTEND_SHEE
   ];
   const AGL = Object.fromEntries(AG.map((a) => [a.k, a.l]));
   const ageBucket = (d) => AG.find((a) => a.t(d)).k;
-  const st = { phour: 'All', pday: null, pptype: 'All', psort: 'items', pdir: -1, pshown: 200, mode: 'pend', reason: 'All', rage: null, rsort: 'qty', rdir: -1, rshown: 200, whs: new Set(), from: '', to: '', status: 'All', ptype: 'All', food: 'All', q: '', age: null, sortKey: 'age', sortDir: -1, shown: 200 };
+  const st = { pten: 'All', phour: 'All', pday: null, pptype: 'All', psort: 'items', pdir: -1, pshown: 200, mode: 'pend', reason: 'All', rage: null, rsort: 'qty', rdir: -1, rshown: 200, whs: new Set(), from: '', to: '', status: 'All', ptype: 'All', food: 'All', q: '', age: null, sortKey: 'age', sortDir: -1, shown: 200 };
   const H = { apikey: SB_READ_KEY, Authorization: 'Bearer ' + SB_READ_KEY };
   const API = SB_URL + '/rest/v1/stocktake_snapshots?id=eq.3&select=';
   let RAW = null, L = [], lastAt = null, updatedLabel = '';
@@ -718,7 +743,7 @@ const ATTEND_CSV_URL_2 = 'https://docs.google.com/spreadsheets/d/' + ATTEND_SHEE
     } catch (e) { alert(e.message); }
   }
   function fillPtype() { return; const s = $('#pptype'); const v = [...new Set(P.map((r) => r.ptype))].sort(); s.replaceChildren(new Option('All process types', 'All'), ...v.map((x) => new Option(x, x))); s.value = v.includes(st.pptype) ? st.pptype : 'All'; st.pptype = s.value; }
-  const prodView = (skip) => { const q = st.q.trim().toLowerCase(); return P.filter((r) => (skip === 'wh' || inWh(r.wh)) && (!st.from || (r.day && r.day >= st.from)) && (!st.to || (r.day && r.day <= st.to)) && (st.pptype === 'All' || r.ptype === st.pptype) && (skip === 'hour' || st.phour === 'All' || r.hour === +st.phour) && matchQ(q, r.user, nameOf(r.user))); };
+  const prodView = (skip) => { const q = st.q.trim().toLowerCase(); return P.filter((r) => (skip === 'wh' || inWh(r.wh)) && (!st.from || (r.day && r.day >= st.from)) && (!st.to || (r.day && r.day <= st.to)) && (st.pptype === 'All' || r.ptype === st.pptype) && (skip === 'hour' || st.phour === 'All' || r.hour === +st.phour) && (skip === 'ten' || st.pten === 'All' || tenureKey(r.user) === st.pten) && matchQ(q, r.user, nameOf(r.user))); };
   // IPH = items / distinct (user, day, hour) slots; rows without day or hour count for items but not for hours
   const pk = (v) => { const slots = new Set(v.filter((r) => r.day && r.hour != null).map((r) => r.user + '|' + r.day + '|' + r.hour)); const ud = new Set(v.filter((r) => r.day).map((r) => r.user + '|' + r.day)); const items = d3.sum(v, (r) => r.items); const slotItems = d3.sum(v.filter((r) => r.day && r.hour != null), (r) => r.items);
     const per = d3.rollup(v.filter((r) => r.day && r.hour != null), (x) => d3.sum(x, (r) => r.items), (r) => r.user + '|' + r.day + '|' + r.hour); const atH = [...per.values()].filter((n) => n >= P_TARGET).length;
@@ -726,9 +751,27 @@ const ATTEND_CSV_URL_2 = 'https://docs.google.com/spreadsheets/d/' + ATTEND_SHEE
     return { atH, atHours: slots.size ? Math.round(100 * atH / slots.size) + '%' : '—', atUsers: uIph.length ? atUsers + ' / ' + uIph.length : '—', items, uh: slots.size, iph: slots.size ? Math.round(slotItems / slots.size) : 0, users: new Set(v.map((r) => r.user)).size, days: new Set(v.map((r) => r.day).filter(Boolean)).size, upd: ud.size ? Math.round(items / ud.size) : 0 }; };
   const shortU = (u) => String(u).split('@')[0];
   // ---------- employee names from the attendance sheet ----------
-  let NAMES = { full: new Map(), num: new Map() }, namesState = ATTEND_CSV_URL ? 'loading' : 'off';
+  let hireCol = ''; let NAMES = { full: new Map(), noLetter: new Map() }, namesState = ATTEND_CSV_URL ? 'loading' : 'off';
   const idKey = (raw) => { const m = String(raw || '').trim().match(/^([A-Za-z]+)0*(\d+)([A-Za-z]?)/); return m ? { num: m[1].toUpperCase() + Number(m[2]), full: m[1].toUpperCase() + Number(m[2]) + (m[3] || '').toUpperCase() } : null; };
-  const nameOf = (user) => { const k = idKey(shortU(user)); if (!k) return ''; return NAMES.full.get(k.full) || NAMES.num.get(k.num) || ''; };
+  const empOf = (user) => { const k = idKey(shortU(user)); if (!k) return null; return NAMES.full.get(k.full) || NAMES.noLetter.get(k.num) || null; };
+  const nameOf = (user) => { const e = empOf(user); return e ? e.name : ''; };
+  // tenure = days from the hiring date in the attendance sheet until today
+  const TEN = [{ k: 't0', l: '0–30 days', max: 30 }, { k: 't1', l: '1–3 months', max: 90 }, { k: 't3', l: '3–6 months', max: 180 }, { k: 't6', l: '6–12 months', max: 365 }, { k: 't12', l: 'Over 1 year', max: Infinity }];
+  const TENL = Object.fromEntries([...TEN.map((t) => [t.k, t.l]), ['tu', 'Hiring date unknown']]);
+  const tenureDays = (user) => { const e = empOf(user); if (!e || !e.hire) return null; return Math.max(0, Math.floor((Date.now() - e.hire) / 864e5)); };
+  const tenureKey = (user) => { const d = tenureDays(user); if (d == null) return 'tu'; return TEN.find((t) => d <= t.max).k; };
+  const tenureLabel = (d) => (d == null ? '—' : d < 60 ? d + ' days' : d < 730 ? Math.round(d / 30.4) + ' months' : (d / 365).toFixed(1) + ' years');
+  const MON = { jan: 0, feb: 1, mar: 2, apr: 3, may: 4, jun: 5, jul: 6, aug: 7, sep: 8, oct: 9, nov: 10, dec: 11 };
+  function parseHire(v) {
+    v = String(v || '').trim(); if (!v) return null; let m;
+    if ((m = v.match(/^(\d{4})[-/.](\d{1,2})[-/.](\d{1,2})/))) return new Date(+m[1], +m[2] - 1, +m[3]).getTime();
+    if ((m = v.match(/^(\d{1,2})[-/.](\d{1,2})[-/.](\d{2,4})/))) { let a = +m[1], b = +m[2], y = +m[3]; if (y < 100) y += 2000; const day = a > 12 ? a : b > 12 ? b : a, mon = a > 12 ? b : b > 12 ? a : b; return new Date(y, mon - 1, day).getTime(); }
+    if ((m = v.match(/^(\d{1,2})[-\s]([A-Za-z]{3})[A-Za-z]*[-\s,]+(\d{2,4})/))) { let y = +m[3]; if (y < 100) y += 2000; const mo = MON[m[2].toLowerCase()]; if (mo != null) return new Date(y, mo, +m[1]).getTime(); }
+    if (/^\d{5}$/.test(v)) return Date.UTC(1899, 11, 30) + +v * 864e5; // sheet serial number
+    const t = Date.parse(v); return isNaN(t) ? null : t;
+  }
+  // employee ID as written in the attendance sheet: VENDOR + 5-digit number + first letter (e.g. MAK00453Y)
+  const empId = (user) => { const m = shortU(user).match(/^([A-Za-z]+)0*(\d+)([A-Za-z]?)/); return m ? m[1].toUpperCase() + String(Number(m[2])).padStart(5, '0') + (m[3] || '').toUpperCase() : ''; };
   async function loadNames() {
     if (!ATTEND_CSV_URL) return;
     try {
@@ -740,21 +783,32 @@ const ATTEND_CSV_URL_2 = 'https://docs.google.com/spreadsheets/d/' + ATTEND_SHEE
       const rows = d3.csvParseRows(text.replace(/^\uFEFF/, ''));
       const hi = rows.findIndex((x) => x.some((c) => /^\s*id\s*$/i.test(c)) && x.some((c) => /name/i.test(c)));
       if (hi < 0) throw new Error('no ID and Name columns found');
-      const ci = rows[hi].findIndex((c) => /^\s*id\s*$/i.test(c)), ni = rows[hi].findIndex((c) => /name/i.test(c));
-      const full = new Map(), num = new Map();
-      rows.slice(hi + 1).forEach((x) => { const k = idKey(x[ci]); const n = String(x[ni] || '').trim(); if (!k || !n) return; full.set(k.full, n); if (!num.has(k.num)) num.set(k.num, n); });
-      NAMES = { full, num }; namesState = 'ok:' + full.size;
+      const ci = rows[hi].findIndex((c) => /^\s*id\s*$/i.test(c)), ni = rows[hi].findIndex((c) => /name/i.test(c)), di = rows[hi].findIndex((c) => /hir|join|start date|date of/i.test(c));
+      hireCol = di >= 0 ? rows[hi][di].trim() : '';
+      const full = new Map(), noLetter = new Map();
+      rows.slice(hi + 1).forEach((x) => { const k = idKey(x[ci]); const n = String(x[ni] || '').trim(); if (!k || !n) return; const o = { name: n, hire: di >= 0 ? parseHire(x[di]) : null }; if (k.full === k.num) noLetter.set(k.num, o); else full.set(k.full, o); });
+      NAMES = { full, noLetter }; namesState = 'ok:' + full.size;
     } catch (e) { namesState = 'err:' + e.message; }
     if (st.mode === 'prod') render();
   }
   function drawProd() {
-    const ex = []; if (st.from || st.to) ex.push('days ' + (st.from || 'start') + ' → ' + (st.to || 'today')); if (st.pptype !== 'All') ex.push(st.pptype); if (st.phour !== 'All') ex.push('hour ' + String(st.phour).padStart(2, '0') + ':00'); if (st.q.trim()) ex.push('search "' + st.q.trim() + '"');
+    const ex = []; if (st.from || st.to) ex.push('days ' + (st.from || 'start') + ' → ' + (st.to || 'today')); if (st.pptype !== 'All') ex.push(st.pptype); if (st.phour !== 'All') ex.push('hour ' + String(st.phour).padStart(2, '0') + ':00'); if (st.pten !== 'All') ex.push('tenure ' + TENL[st.pten]); if (st.q.trim()) ex.push('search "' + st.q.trim() + '"');
     $('#selName').textContent = scopeName(); $('#flt').textContent = ' · productivity' + (ex.length ? ' · ' + ex.join(' · ') : '');
     $('#exScope').textContent = 'Export: ' + (st.whs.size ? selList().join(', ') : 'all warehouses') + ' productivity' + (ex.length ? ' (filtered)' : '');
     $('#tagAge').hidden = true;
     $('#pInfo').textContent = (namesState.startsWith('ok') ? 'Names from attendance sheet (' + namesState.slice(3) + ' employees) · ' : namesState.startsWith('err') ? 'Attendance sheet could not load (' + namesState.slice(4) + ') · ' : '') + (pMeta ? `Inbound only · ${pMeta.live ? 'live, from the Refresh Productivity bookmark' : 'loaded ' + pMeta.files.join(', ')} · days ${pMeta.from} → ${pMeta.to} · ${when(pMeta.at)}${pMeta.live ? '' : ' · kept in this browser only'}` : 'No productivity file yet. Export it from BigQuery Reports > Putaway productivity for users, download it from BigQuery Jobs, then click "Load productivity CSV".');
     { const hs = [...new Set(prodView('hour').map((r) => r.hour).filter((h) => h != null))].sort((a, b) => a - b); const s2 = $('#phour'); const cur = st.phour;
       s2.replaceChildren(new Option('All hours', 'All'), ...hs.map((h) => new Option(String(h).padStart(2, '0') + ':00', String(h)))); s2.value = cur === 'All' || hs.includes(+cur) ? cur : 'All'; st.phour = s2.value; }
+    { const s3 = $('#pten'); const cur = st.pten; const keys = [...TEN.map((t) => t.k), 'tu'];
+      s3.replaceChildren(new Option('All tenures', 'All'), ...keys.map((k) => new Option(TENL[k], k))); s3.value = keys.includes(cur) ? cur : 'All'; st.pten = s3.value; }
+    { const tv = prodView('ten'); const rows = [...TEN.map((t) => t.k), 'tu'].map((k) => { const x = tv.filter((r) => tenureKey(r.user) === k); return { k, l: TENL[k], ...pk(x) }; }).filter((r) => r.users || r.k !== 'tu');
+      const max = d3.max(rows, (r) => r.iph) || 1; const head = el('div', 'exhead'); head.append(el('span', '', 'Tenure'), el('span', '', ''), el('span', '', 'IPH'), el('span', '', 'Users'), el('span', '', 'At target'));
+      $('#pTen').replaceChildren(head, ...rows.map((r) => { const b = el('button', 'exrow'); b.type = 'button'; b.dataset.ten = r.k; b.setAttribute('aria-pressed', String(st.pten === r.k));
+        const l = el('span', 'exl'); const dot = el('i'); dot.style.background = r.k === 'tu' ? 'var(--muted)' : 'var(--p)'; l.append(dot, r.l);
+        const tr = el('span', 'extrack'); const f = el('i'); f.style.width = (100 * r.iph / max) + '%'; f.style.background = r.iph >= P_TARGET ? 'var(--g)' : r.iph >= 700 ? 'var(--o)' : 'var(--r)'; if (!r.iph) f.style.minWidth = '0'; tr.append(f);
+        const q = el('span', 'exq', r.uh ? F(r.iph) : '–'); if (r.uh) q.style.color = r.iph >= P_TARGET ? 'var(--g)' : 'var(--r)';
+        b.append(l, tr, q, el('span', 'exp', F(r.users)), el('span', 'exs', r.atUsers)); return b; }));
+      $('#tenNote').textContent = namesState.startsWith('ok') ? (hireCol ? 'Days from "' + hireCol + '" in the attendance sheet until today. Click a row to filter.' : 'No hiring date column found in the attendance sheet, so everyone is "unknown".') : 'Needs the attendance sheet to load.'; }
     const all = prodView('wh');
     $('#pcards').replaceChildren(...WAREHOUSES.map((wh) => {
       const k = pk(all.filter((r) => r.wh === wh));
@@ -797,12 +851,12 @@ const ATTEND_CSV_URL_2 = 'https://docs.google.com/spreadsheets/d/' + ATTEND_SHEE
     } else hbox.append(el('div', 'msg', P.length ? 'No rows for these filters.' : 'No data yet.'));
     drawHeat(v); drawLeaders(v); drawHourLeaders();
     // users
-    const us = d3.rollups(v, (x) => ({ ...pk(x), types: [...new Set(x.map((r) => r.ptype))].join(', ') }), (r) => r.wh, (r) => r.user).flatMap(([wh, a]) => a.map(([user, o]) => ({ wh, name: nameOf(user), user: shortU(user), full: user, items: o.items, hours: o.uh, iph: o.iph, vs: o.iph / P_TARGET, atH: o.atH, days: o.days, types: o.types })));
+    const us = d3.rollups(v, (x) => ({ ...pk(x), types: [...new Set(x.map((r) => r.ptype))].join(', ') }), (r) => r.wh, (r) => r.user).flatMap(([wh, a]) => a.map(([user, o]) => ({ wh, eid: empId(user), ten: tenureDays(user), name: nameOf(user), user: shortU(user), full: user, items: o.items, hours: o.uh, iph: o.iph, vs: o.iph / P_TARGET, atH: o.atH, days: o.days, types: o.types })));
     us.sort((a, b) => { const va = a[st.psort], vb = b[st.psort]; const c = typeof va === 'number' ? va - vb : String(va).localeCompare(String(vb)); return c * st.pdir || b.items - a.items; });
     document.querySelectorAll('#ptbl th').forEach((th) => { const kk = th.querySelector('button').dataset.psort; if (kk === st.psort) th.setAttribute('aria-sort', st.pdir > 0 ? 'ascending' : 'descending'); else th.removeAttribute('aria-sort'); });
     $('#ptbl').classList.toggle('single', st.whs.size === 1);
     const frag = document.createDocumentFragment();
-    us.slice(0, st.pshown).forEach((u) => { const tr = el('tr'); const td = (c, x) => tr.append(el('td', c, x)); td('c-wh colwh', u.wh); tr.append(el('td', 'c-title', moodOf(u.iph) + ' ' + (u.name || '—'))); const c = el('td', 'c-sku', u.full); tr.append(c); td('num', F(u.items)); td('num', F(u.hours)); td('num ' + (u.iph >= P_TARGET ? 'ok' : 'low'), F(u.iph)); td('num ' + (u.iph >= P_TARGET ? 'ok' : 'low'), Math.round(100 * u.iph / P_TARGET) + '%'); td('num', F(u.atH) + ' / ' + F(u.hours)); td('num', F(u.days)); frag.append(tr); });
+    us.slice(0, st.pshown).forEach((u) => { const tr = el('tr'); const td = (c, x) => tr.append(el('td', c, x)); td('c-wh colwh', u.wh); tr.append(el('td', 'c-sku', u.eid || '—')); tr.append(el('td', 'c-title', moodOf(u.iph) + ' ' + (u.name || '—'))); { const t = el('td', 'num', tenureLabel(u.ten)); if (u.ten != null && u.ten <= 30) t.style.color = 'var(--b)'; tr.append(t); } const c = el('td', 'c-sku', u.full); tr.append(c); td('num', F(u.items)); td('num', F(u.hours)); td('num ' + (u.iph >= P_TARGET ? 'ok' : 'low'), F(u.iph)); td('num ' + (u.iph >= P_TARGET ? 'ok' : 'low'), Math.round(100 * u.iph / P_TARGET) + '%'); td('num', F(u.atH) + ' / ' + F(u.hours)); td('num', F(u.days)); frag.append(tr); });
     $('#pbody').replaceChildren(frag);
     $('#pcount').textContent = us.length ? `Showing ${F(Math.min(st.pshown, us.length))} of ${F(us.length)} users` : '';
     $('#pmore').hidden = us.length <= st.pshown;
@@ -812,37 +866,65 @@ const ATTEND_CSV_URL_2 = 'https://docs.google.com/spreadsheets/d/' + ATTEND_SHEE
   const MEDALS = ['🥇', '🥈', '🥉', '🏅', '🏅'];
   const moodOf = (iph) => (iph >= P_TARGET * 1.5 ? '🏆' : iph >= P_TARGET ? '✅' : iph >= 700 ? '😐' : iph >= 500 ? '😟' : '🐢');
   const label = (u) => u.name || shortU(u.user);
+  const initials = (u) => { const n = (u.name || shortU(u.user)).replace(/[^A-Za-z\u0600-\u06FF ]/g, ' ').trim().split(/\s+/); return ((n[0] || '?')[0] + (n.length > 1 ? n[1][0] : (n[0] || '').slice(1, 2))).toUpperCase(); };
+  const firstTwo = (u) => (u.name ? u.name.split(/\s+/).slice(0, 2).join(' ') : shortU(u.user));
+  const pct = (iph) => Math.round(100 * iph / P_TARGET);
+  const bar = (iph, color) => { const pr = el('div', 'prog'); const i = el('i'); i.style.width = Math.min(100, pct(iph)) + '%'; i.style.background = color; pr.append(i); return pr; };
   function drawLeaders(v) {
     const by = d3.rollups(v, (x) => pk(x), (r) => r.user).map(([user, k]) => ({ user, name: nameOf(user), whs: [...new Set(v.filter((r) => r.user === user).map((r) => r.wh))].join(', '), ...k })).filter((u) => u.uh > 0);
     const minH = by.some((u) => u.uh >= 2) ? 2 : 1; const pool = by.filter((u) => u.uh >= minH);
     const top = pool.slice().sort((a, b) => b.iph - a.iph || b.items - a.items).slice(0, 5);
     const attn = pool.filter((u) => u.iph < P_TARGET).sort((a, b) => a.iph - b.iph || a.items - b.items).slice(0, 5);
-    const row = (u, i, kind) => { const d = el('div', 'lbr ' + (kind === 'top' ? (i === 0 ? 'top1 good' : 'good') : 'bad'));
-      const md = el('span', 'md', kind === 'top' ? MEDALS[i] : moodOf(u.iph)); const who = el('div'); who.append(el('div', 'nm', label(u)), el('div', 'sb', (u.name ? shortU(u.user) + ' · ' : '') + u.whs + ' · ' + F(u.uh) + ' h · ' + F(u.items) + ' items'));
-      const vl = el('div', 'vl', F(u.iph)); vl.append(el('small', '', kind === 'top' ? Math.round(100 * u.iph / P_TARGET) + '% of target' : F(P_TARGET - u.iph) + ' below target'));
-      d.append(md, who, vl); return d; };
-    $('#pTop').replaceChildren(...(top.length ? top.map((u, i) => row(u, i, 'top')) : [el('div', 'msg', P.length ? 'No users for these filters.' : 'No data yet.')]));
-    $('#pAttn').replaceChildren(...(attn.length ? attn.map((u, i) => row(u, i, 'attn')) : [el('div', 'msg', pool.length ? '🎉 Everyone is at target for these filters.' : P.length ? 'No users for these filters.' : 'No data yet.')]));
+    // podium for 1-3, slim rows for 4-5
+    const T = $('#pTop');
+    if (!top.length) T.replaceChildren(el('div', 'msg', P.length ? 'No users for these filters.' : 'No data yet.'));
+    else {
+      const pod = el('div', 'podium');
+      [1, 0, 2].forEach((i) => { const u = top[i]; if (!u) { pod.append(el('div')); return; }
+        const c = el('div', 'pod p' + (i + 1)); c.title = u.user;
+        const av = el('div', 'av', initials(u)); const iph = el('div', 'iph', F(u.iph)); iph.append(el('small', '', pct(u.iph) + '% of target'));
+        c.append(el('div', 'md', MEDALS[i]), av, el('div', 'nm', firstTwo(u)), el('div', 'sb', u.whs + ' · ' + F(u.uh) + ' h'), iph); pod.append(c); });
+      const rows = el('div', 'lrows');
+      top.slice(3).forEach((u, j) => { const r = el('div', 'lrow good'); r.title = u.user; const who = el('div', 'who'); who.append(el('div', 'nm', firstTwo(u)), el('div', 'sb', u.whs + ' · ' + F(u.uh) + ' h · ' + F(u.items) + ' items'), bar(u.iph, 'var(--g)'));
+        const vl = el('div', 'vl', F(u.iph)); vl.append(el('small', '', pct(u.iph) + '%')); r.append(el('div', 'rk', String(j + 4)), el('div', 'av sm', initials(u)), who, vl); rows.append(r); });
+      T.replaceChildren(pod, rows);
+    }
+    const A = $('#pAttn');
+    if (!attn.length) A.replaceChildren(el('div', 'msg', pool.length ? '🎉 Everyone is at target for these filters.' : P.length ? 'No users for these filters.' : 'No data yet.'));
+    else {
+      const rows = el('div', 'lrows'); rows.style.marginTop = '0';
+      attn.forEach((u, j) => { const r = el('div', 'lrow bad'); r.title = u.user; const who = el('div', 'who'); who.append(el('div', 'nm', moodOf(u.iph) + ' ' + firstTwo(u)), el('div', 'sb', u.whs + ' · ' + F(u.uh) + ' h · ' + F(u.items) + ' items · ' + F(P_TARGET - u.iph) + ' short'), bar(u.iph, u.iph >= 700 ? 'var(--o)' : 'var(--r)'));
+        const vl = el('div', 'vl', F(u.iph)); vl.append(el('small', '', pct(u.iph) + '% of target')); r.append(el('div', 'rk', String(j + 1)), el('div', 'av sm red', initials(u)), who, vl); rows.append(r); });
+      A.replaceChildren(rows);
+    }
     S_lead.top = top; S_lead.attn = attn;
   }
+  let hlAll = false;
   function drawHourLeaders() {
-    const H = S_heat; const grid = $('#hlGrid'); const out = [];
-    $('#hlNote').textContent = H && H.day ? (H.day === 'all' ? 'All days, average items per hour worked' : 'Day ' + H.day) + ' · change it with the day picker in "Hourly performance by user"' : '';
-    if (!H || !H.rows || !H.rows.length) { grid.replaceChildren(el('div', 'msg', P.length ? 'No rows for these filters.' : 'No data yet.')); S_lead.hours = []; return; }
-    const hours = H.hrs.slice().reverse();
-    grid.replaceChildren(...hours.map((h) => {
+    const H = S_heat; const body = $('#hlGrid'); const out = [];
+    $('#hlNote').textContent = H && H.day ? (H.day === 'all' ? 'All days · average items per hour worked' : 'Day ' + H.day) + ' · pick the day in "Hourly performance by user"' : '';
+    if (!H || !H.rows || !H.rows.length) { body.replaceChildren(); $('#hlCount').textContent = P.length ? 'No rows for these filters.' : 'No data yet.'; $('#hlMore').hidden = true; S_lead.hours = []; return; }
+    const hours = H.hrs.slice().reverse(); const show = hlAll ? hours : hours.slice(0, 6);
+    const chip = (u, good, i) => { const c = el('span', 'pc ' + (good ? 'g' : 'r')); c.title = (u.name ? u.name + ' · ' : '') + u.user; const nb = el('b', '', F(u.n)); nb.style.color = u.n >= P_TARGET ? 'var(--g)' : u.n >= 700 ? 'var(--o)' : 'var(--r)'; c.append(good ? MEDALS[i] : moodOf(u.n), el('span', '', firstTwo(u)), nb); return c; };
+    const frag = document.createDocumentFragment();
+    hours.forEach((h) => {
       const list = H.rows.filter((u) => u.h.has(h)).map((u) => ({ ...u, n: u.h.get(h) })).sort((a, b) => b.n - a.n);
       const avg = list.length ? Math.round(d3.mean(list, (u) => u.n)) : 0; const atT = list.filter((u) => u.n >= P_TARGET).length;
       // no one is in both lists: with 5 users or fewer, best = at target and worst = below target
       const best = list.length <= 5 ? list.filter((u) => u.n >= P_TARGET) : list.slice(0, 5);
       const worst = list.length <= 5 ? list.filter((u) => u.n < P_TARGET).reverse() : list.slice(Math.max(5, list.length - 5)).reverse();
       out.push({ h, avg, users: list.length, atT, best, worst });
-      const c = el('div', 'hcard'); const hh = el('div', 'hh'); const t = el('b', '', String(h).padStart(2, '0') + ':00'); const m = el('span', 'note', F(list.length) + ' users · avg ' + F(avg) + ' · ' + F(atT) + ' at target');
-      hh.append(t, m);
-      const mk = (arr, good) => { const ul = el('ul', 'hl'); arr.forEach((u, i) => { const li = el('li'); li.append(el('span', '', good ? MEDALS[i] : moodOf(u.n)), el('span', '', label(u)), (() => { const b = el('b', '', F(u.n)); b.style.color = u.n >= P_TARGET ? 'var(--g)' : 'var(--r)'; return b; })()); li.title = u.user; ul.append(li); }); if (!arr.length) ul.append(el('li', 'note', good ? '—' : '🎉 none below target')); return ul; };
-      const cols = el('div', 'hcols'); const a = el('div'); const ah = el('h4', '', 'Best 5'); ah.style.color = 'var(--g)'; a.append(ah, mk(best, true)); const b = el('div'); const bh = el('h4', '', 'Worst 5'); bh.style.color = 'var(--r)'; b.append(bh, mk(worst, false)); cols.append(a, b);
-      c.append(hh, cols); return c;
-    }));
+      if (!show.includes(h)) return;
+      const tr = el('tr'); tr.append(el('td', 'hr', String(h).padStart(2, '0') + ':00'));
+      const ac = el('td', 'avgc'); const ab = el('b', '', F(avg)); ab.style.color = avg >= P_TARGET ? 'var(--g)' : 'var(--r)'; ac.append(ab, document.createTextNode(' · ' + F(list.length) + (list.length === 1 ? ' user' : ' users')), bar(avg, avg >= P_TARGET ? 'var(--g)' : avg >= 700 ? 'var(--o)' : 'var(--r)')); tr.append(ac);
+      tr.append(el('td', 'num', F(atT) + ' / ' + F(list.length)));
+      const b1 = el('td'); const c1 = el('div', 'chips2'); best.forEach((u, i) => c1.append(chip(u, true, i))); if (!best.length) c1.append(el('span', 'note', '—')); b1.append(c1); tr.append(b1);
+      const b2 = el('td'); const c2 = el('div', 'chips2'); worst.forEach((u) => c2.append(chip(u, false))); if (!worst.length) c2.append(el('span', 'note', '🎉 none below target')); b2.append(c2); tr.append(b2);
+      frag.append(tr);
+    });
+    body.replaceChildren(frag);
+    $('#hlCount').textContent = `Showing ${show.length} of ${hours.length} hours, latest first`;
+    $('#hlMore').hidden = hours.length <= 6; $('#hlMore').textContent = hlAll ? 'Show latest 6 hours' : 'Show all hours';
     S_lead.hours = out;
   }
   const cls = (n) => (n >= P_TARGET ? 'ok' : n >= 700 ? 'mid' : 'low');
@@ -859,11 +941,11 @@ const ATTEND_CSV_URL_2 = 'https://docs.google.com/spreadsheets/d/' + ATTEND_SHEE
       return { h, items: d3.sum(x, (r) => r.items), hours: slots.length, iph: slots.length ? Math.round(d3.sum(slots) / slots.length) : 0, atH: slots.filter((n) => n >= P_TARGET).length, whs: [...new Set(x.map((r) => r.wh))].join(', ') };
     }, (r) => r.user).map(([user, o]) => ({ user, name: nameOf(user), ...o })).sort((a, b) => b.iph - a.iph);
     const hrs = d3.range(24).filter((h) => vv.some((r) => r.hour === h));
-    const hr = el('tr'); hr.append(el('th', 'plain colwh', 'Warehouse'), el('th', 'plain', 'Name'), el('th', 'plain', 'Username'), ...hrs.map((h) => el('th', 'plain h', String(h).padStart(2, '0'))), el('th', 'plain num', 'Items'), el('th', 'plain num', 'Hours'), el('th', 'plain num', 'IPH'), el('th', 'plain num', 'At target'));
+    const hr = el('tr'); hr.append(el('th', 'plain colwh', 'Warehouse'), el('th', 'plain', 'Employee ID'), el('th', 'plain', 'Name'), el('th', 'plain', 'Username'), ...hrs.map((h) => el('th', 'plain h', String(h).padStart(2, '0'))), el('th', 'plain num', 'Items'), el('th', 'plain num', 'Hours'), el('th', 'plain num', 'IPH'), el('th', 'plain num', 'At target'));
     $('#hmhead').replaceChildren(hr);
     const frag = document.createDocumentFragment();
     byU.forEach((u) => {
-      const tr = el('tr'); tr.append(el('td', 'c-wh colwh', u.whs), el('td', 'c-title', u.name || '—'), el('td', 'c-sku', u.user));
+      const tr = el('tr'); tr.append(el('td', 'c-wh colwh', u.whs), el('td', 'c-sku', empId(u.user) || '—'), el('td', 'c-title', u.name || '—'), el('td', 'c-sku', u.user));
       hrs.forEach((h) => { const n = u.h.get(h); const c = el('td', 'h' + (n != null ? ' ' + cls(n) : ''), n != null ? F(n) : ''); if (n != null) c.title = u.user + ' · ' + String(h).padStart(2, '0') + ':00 · ' + F(n) + ' items'; tr.append(c); });
       tr.append(el('td', 'num', F(u.items)), el('td', 'num', F(u.hours)), el('td', 'num ' + (u.iph >= P_TARGET ? 'ok' : 'low'), F(u.iph)), el('td', 'num', F(u.atH) + ' / ' + F(u.hours)));
       frag.append(tr);
@@ -879,10 +961,13 @@ const ATTEND_CSV_URL_2 = 'https://docs.google.com/spreadsheets/d/' + ATTEND_SHEE
   document.addEventListener('drop', (e) => { if (st.mode !== 'prod') return; e.preventDefault(); const f = [...e.dataTransfer.files].filter((x) => /\.csv$/i.test(x.name)); if (f.length) loadProdFiles(f); });
   $('#pmore').addEventListener('click', () => { st.pshown += 200; render(); });
   $('#pday').addEventListener('change', (e) => { st.pday = e.target.value; render(); });
+  $('#hlMore').addEventListener('click', () => { hlAll = !hlAll; drawHourLeaders(); });
   $('#phour').addEventListener('change', (e) => { st.phour = e.target.value; st.pshown = 200; render(); });
+  $('#pten').addEventListener('change', (e) => { st.pten = e.target.value; st.pshown = 200; render(); });
+  $('#pTen').addEventListener('click', (e) => { const b = e.target.closest('button[data-ten]'); if (b) { st.pten = st.pten === b.dataset.ten ? 'All' : b.dataset.ten; st.pshown = 200; render(); } });
   $('#pcards').addEventListener('click', (e) => { const b = e.target.closest('button[data-wh]'); if (b) toggleWh(b.dataset.wh); });
-  $('#ptbl thead').addEventListener('click', (e) => { const b = e.target.closest('button[data-psort]'); if (!b) return; const k = b.dataset.psort; if (k === st.psort) st.pdir = -st.pdir; else { st.psort = k; st.pdir = ['items', 'hours', 'iph', 'days', 'vs', 'atH'].includes(k) ? -1 : 1; } render(); });
-  const prodUsersOut = () => S_prodUsers.map((u) => ({ Warehouse: u.wh, Name: u.name, Username: u.full, Items: u.items, 'Active hours': u.hours, IPH: u.iph, 'vs target (1,000)': Math.round(100 * u.iph / P_TARGET) + '%', 'Hours at target': u.atH, Days: u.days }));
+  $('#ptbl thead').addEventListener('click', (e) => { const b = e.target.closest('button[data-psort]'); if (!b) return; const k = b.dataset.psort; if (k === st.psort) st.pdir = -st.pdir; else { st.psort = k; st.pdir = ['items', 'hours', 'iph', 'days', 'vs', 'atH', 'ten'].includes(k) ? -1 : 1; } render(); });
+  const prodUsersOut = () => S_prodUsers.map((u) => ({ Warehouse: u.wh, 'Employee ID': u.eid, Name: u.name, 'Tenure (days)': u.ten ?? '', 'Tenure group': TENL[tenureKey(u.full)], Username: u.full, Items: u.items, 'Active hours': u.hours, IPH: u.iph, 'vs target (1,000)': Math.round(100 * u.iph / P_TARGET) + '%', 'Hours at target': u.atH, Days: u.days }));
   $('#exCsv').addEventListener('click', (e) => { if (st.mode !== 'prod') return; e.stopImmediatePropagation(); const r = prodUsersOut(); if (!r.length) { alert('No productivity rows for these filters.'); return; } download(new Blob([toCSV(r)], { type: 'text/csv;charset=utf-8' }), `Putaway_productivity_${scopeFile()}_${stamp()}.csv`); });
   $('#exXlsx').addEventListener('click', (e) => {
     if (st.mode !== 'prod') return; e.stopImmediatePropagation();
@@ -895,7 +980,7 @@ const ATTEND_CSV_URL_2 = 'https://docs.google.com/spreadsheets/d/' + ATTEND_SHEE
     add('Warehouses', sum); add('Users', prodUsersOut());
     add('By day', [...new Set(v.map((r) => r.day).filter(Boolean))].sort().map((d) => { const k = pk(v.filter((r) => r.day === d)); return { Day: d, Items: k.items, IPH: k.iph, 'Active users': k.users, 'User-hours': k.uh }; }));
     add('By hour', d3.range(24).map((h) => { const k = pk(v.filter((r) => r.hour === h)); return { Hour: String(h).padStart(2, '0') + ':00', Items: k.items, IPH: k.iph, 'Active users': k.users }; }));
-    if (S_heat.rows && S_heat.rows.length) add('Hourly by user', S_heat.rows.map((u) => { const o = { Warehouse: u.whs, Name: u.name, Username: u.user }; S_heat.hrs.forEach((h) => { o[String(h).padStart(2, '0') + ':00'] = u.h.get(h) ?? ''; }); return { ...o, Items: u.items, Hours: u.hours, IPH: u.iph, 'Hours at target': u.atH, Day: S_heat.day === 'all' ? 'All days (average)' : S_heat.day }; }));
+    if (S_heat.rows && S_heat.rows.length) add('Hourly by user', S_heat.rows.map((u) => { const o = { Warehouse: u.whs, 'Employee ID': empId(u.user), Name: u.name, Username: u.user }; S_heat.hrs.forEach((h) => { o[String(h).padStart(2, '0') + ':00'] = u.h.get(h) ?? ''; }); return { ...o, Items: u.items, Hours: u.hours, IPH: u.iph, 'Hours at target': u.atH, Day: S_heat.day === 'all' ? 'All days (average)' : S_heat.day }; }));
     add('Top 5 and attention', [...S_lead.top.map((u, i) => ({ List: 'Top 5', Rank: i + 1, Name: u.name, Username: u.user, Warehouses: u.whs, Items: u.items, Hours: u.uh, IPH: u.iph, 'vs target': Math.round(100 * u.iph / P_TARGET) + '%' })), ...S_lead.attn.map((u, i) => ({ List: 'Need attention', Rank: i + 1, Name: u.name, Username: u.user, Warehouses: u.whs, Items: u.items, Hours: u.uh, IPH: u.iph, 'vs target': Math.round(100 * u.iph / P_TARGET) + '%' }))]);
     add('Best and worst by hour', S_lead.hours.flatMap((x) => [...x.best.map((u, i) => ({ Hour: String(x.h).padStart(2, '0') + ':00', List: 'Best', Rank: i + 1, Name: u.name, Username: u.user, Items: u.n })), ...x.worst.map((u, i) => ({ Hour: String(x.h).padStart(2, '0') + ':00', List: 'Worst', Rank: i + 1, Name: u.name, Username: u.user, Items: u.n }))]));
     add('Raw', v.map((r) => ({ Warehouse: r.wh, Name: nameOf(r.user), Username: r.user, 'Process type': r.ptype, Day: r.day, Hour: r.hour, Items: r.items, 'At target (1,000)': r.hour == null ? '' : r.items >= P_TARGET ? 'Yes' : 'No' })));
@@ -1024,7 +1109,7 @@ const ATTEND_CSV_URL_2 = 'https://docs.google.com/spreadsheets/d/' + ATTEND_SHEE
   $('#rcards').addEventListener('click', (e) => { const b = e.target.closest('button[data-wh]'); if (b) toggleWh(b.dataset.wh); });
   $('#rmore').addEventListener('click', () => { st.rshown += 200; render(); });
   $('#rtbl thead').addEventListener('click', (e) => { const b = e.target.closest('button[data-rsort]'); if (!b) return; const k = b.dataset.rsort; if (k === st.rsort) st.rdir = -st.rdir; else { st.rsort = k; st.rdir = ['qty', 'age'].includes(k) ? -1 : 1; } render(); });
-  $('#reset').addEventListener('click', () => { st.reason = 'All'; st.rage = null; $('#reason').value = 'All'; st.phour = 'All'; });
+  $('#reset').addEventListener('click', () => { st.reason = 'All'; st.rage = null; $('#reason').value = 'All'; st.phour = 'All'; st.pten = 'All'; });
   $('#reset').addEventListener('click', () => { st.whs.clear(); Object.assign(st, { from: '', to: '', status: 'All', ptype: 'All', food: 'All', q: '', age: null, sortKey: 'age', sortDir: -1, shown: 200 }); ['#q', '#dFrom', '#dTo'].forEach((s) => { $(s).value = ''; }); ['#status', '#ptype', '#food'].forEach((s) => { $(s).value = 'All'; }); render(); });
   $('#more').addEventListener('click', () => { st.shown += 200; drawTable(); });
   $('#tbl thead').addEventListener('click', (e) => { const b = e.target.closest('button[data-sort]'); if (!b) return; const k = b.dataset.sort; if (k === st.sortKey) st.sortDir = -st.sortDir; else { st.sortKey = k; st.sortDir = ['age', 'rem', 'done'].includes(k) ? -1 : 1; } st.shown = 200; drawTable(); });
