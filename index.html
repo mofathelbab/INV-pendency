@@ -783,8 +783,19 @@ const ATTEND_CSV_URL_2 = 'https://docs.google.com/spreadsheets/d/' + ATTEND_SHEE
       const rows = d3.csvParseRows(text.replace(/^\uFEFF/, ''));
       const hi = rows.findIndex((x) => x.some((c) => /^\s*id\s*$/i.test(c)) && x.some((c) => /name/i.test(c)));
       if (hi < 0) throw new Error('no ID and Name columns found');
-      const ci = rows[hi].findIndex((c) => /^\s*id\s*$/i.test(c)), ni = rows[hi].findIndex((c) => /name/i.test(c)), di = rows[hi].findIndex((c) => /hir|join|start date|date of/i.test(c));
-      hireCol = di >= 0 ? rows[hi][di].trim() : '';
+      const ci = rows[hi].findIndex((c) => /^\s*id\s*$/i.test(c)), ni = rows[hi].findIndex((c) => /name/i.test(c)); let di = rows[hi].findIndex((c) => /hir|join|start date|date of/i.test(c));
+      // Google's CSV can blank a header like "Hiring Date" when the column holds dates, so also find it by its values
+      if (di < 0) {
+        const lo = Date.UTC(2015, 0, 1), hiT = Date.now() + 864e5; let best = -1, bestN = 0;
+        const width = Math.min(30, d3.max(rows, (x) => x.length) || 0);
+        for (let c = 0; c < width; c++) {
+          if (c === ci || c === ni) continue;
+          let n = 0; rows.slice(hi + 1, hi + 201).forEach((x) => { const v = String(x[c] || '').trim(); if (!/[0-9]/.test(v) || !/[-/.\s]/.test(v)) return; const t = parseHire(v); if (t && t >= lo && t <= hiT) n++; });
+          if (n > bestN) { bestN = n; best = c; }
+        }
+        if (bestN >= 3) di = best;
+      }
+      hireCol = di >= 0 ? (rows[hi][di].trim() || 'Hiring Date') : '';
       const full = new Map(), noLetter = new Map();
       rows.slice(hi + 1).forEach((x) => { const k = idKey(x[ci]); const n = String(x[ni] || '').trim(); if (!k || !n) return; const o = { name: n, hire: di >= 0 ? parseHire(x[di]) : null }; if (k.full === k.num) noLetter.set(k.num, o); else full.set(k.full, o); });
       NAMES = { full, noLetter }; namesState = 'ok:' + full.size;
