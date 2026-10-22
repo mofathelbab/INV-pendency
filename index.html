@@ -503,8 +503,14 @@ const ATTEND_CSV_URL_2 = 'https://docs.google.com/spreadsheets/d/' + ATTEND_SHEE
       if (pMeta && !pMeta.live && pMeta.at > Date.parse(j[0].updated_at)) return; // a newer file you loaded yourself wins
       const r2 = await fetch(A + 'updated_at,cols,rows', { headers: H, cache: 'no-store' }); if (!r2.ok) return;
       const d = (await r2.json())[0]; if (!d) return;
-      const ix = Object.fromEntries(d.cols.map((c, i) => [c, i]));
-      P = d.rows.map((a) => ({ wh: String(a[ix.partner_warehouse_code] || '').trim(), user: String(a[ix.username] || '').trim(), ptype: String(a[ix.process_type] || '').trim(), day: String(a[ix.day] || '').slice(0, 10), hour: a[ix.hour] === '' || a[ix.hour] == null ? null : +a[ix.hour], items: +a[ix.putaway_items] || 0 }))
+      let src = d;
+      if (d.cols.length === 1 && d.cols[0] === 'csv') { // whole BigQuery files saved by Supabase: parse them here
+        const cols = ['partner_warehouse_code', 'username', 'process_type', 'day', 'hour', 'putaway_items']; const seen = new Set(); const rows = [];
+        d.rows.forEach((f) => { d3.csvParse(String(f[0] || '').replace(/^\uFEFF/, '')).forEach((r) => { const a = cols.map((c) => String(r[c] ?? '').trim()); const k = a.join('|'); if (!seen.has(k)) { seen.add(k); rows.push(a); } }); });
+        src = { cols, rows };
+      }
+      const ix = Object.fromEntries(src.cols.map((c, i) => [c, i]));
+      P = src.rows.map((a) => ({ wh: String(a[ix.partner_warehouse_code] || '').trim(), user: String(a[ix.username] || '').trim(), ptype: String(a[ix.process_type] || '').trim(), day: String(a[ix.day] || '').slice(0, 10), hour: a[ix.hour] === '' || a[ix.hour] == null ? null : +a[ix.hour], items: +a[ix.putaway_items] || 0 }))
         .filter((r) => r.wh && r.user && r.ptype.toLowerCase() === P_ONLY_TYPE);
       const days = [...new Set(P.map((r) => r.day).filter(Boolean))].sort();
       prodAt = d.updated_at; pMeta = { live: true, at: Date.parse(d.updated_at), files: ['live data'], from: days[0] || '', to: days[days.length - 1] || '' };
