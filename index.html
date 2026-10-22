@@ -624,6 +624,11 @@ const ATTEND_CSV_URL_2 = 'https://docs.google.com/spreadsheets/d/' + ATTEND_SHEE
     $('#exScope').textContent = 'Export: ' + (st.whs.size ? selList().join(', ') : 'all warehouses') + (ex.length ? ' (filtered)' : '');
     $('#tagAge').hidden = !st.age; $('#tagAge').textContent = st.age ? 'Age: ' + AGL[st.age] + ' ×' : '';
     document.body.classList.toggle('mode-res', st.mode === 'res'); document.body.classList.toggle('mode-prod', st.mode === 'prod');
+    { const at = st.mode === 'res' ? rAt : st.mode === 'prod' ? (pMeta && pMeta.live ? prodAt : null) : lastAt;
+      const ms = at ? Date.parse(at) : NaN; const lab = $('#loadedAt'); const what = st.mode === 'res' ? 'Reservations' : st.mode === 'prod' ? 'Productivity' : 'Putaway';
+      if (isNaN(ms)) { lab.textContent = st.mode === 'prod' && pMeta && !pMeta.live ? 'file loaded' : '—'; lab.style.color = ''; lab.title = ''; }
+      else { const mins = Math.round((Date.now() - ms) / 6e4); lab.textContent = when(at) + (mins > 30 ? ' · ' + (mins < 120 ? mins + ' min' : Math.round(mins / 60) + ' h') + ' old' : '');
+        lab.style.color = mins > 30 ? 'var(--o)' : ''; lab.title = mins > 30 ? what + ' data has not been refreshed for ' + mins + ' minutes. Is its bookmark still running on grocery-tools?' : what + ' data, refreshed by its bookmark every 15 minutes'; } }
     document.querySelectorAll('[data-mode]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.mode === st.mode)));
     if (st.mode === 'res') { drawRes(); drawDr(); return; }
     if (st.mode === 'prod') { drawProd(); drawDr(); return; }
