@@ -181,6 +181,18 @@ details.setup ol{margin:10px 0 4px;padding-left:20px;display:grid;gap:6px}
 .mode{appearance:none;font:inherit;font-weight:800;font-size:14px;color:var(--muted);background:none;border:0;border-radius:999px;padding:8px 16px;cursor:pointer}
 .mode[aria-pressed="true"]{background:var(--y);color:var(--yink)}
 body.mode-res .pv,body.mode-prod .pv{display:none!important}
+body.st-closed #kpis,body.st-closed #aging,body.st-closed #daily{display:none!important}
+.ckpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,200px),1fr));gap:12px}
+.ctile{background:var(--panel2);border:1px solid var(--line);border-radius:14px;padding:14px;display:grid;gap:6px}
+.ctile .t{color:var(--muted);font-size:12.5px;font-weight:700}
+.ctile .row3{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.ctile .row3 b{display:block;font-size:22px;font-weight:800;line-height:1.1}
+.ctile .row3 span{color:var(--muted);font-size:11.5px}
+.ctile.today{border-color:rgba(52,211,153,.5)}
+.vt th{padding:10px 12px}
+.vt th.num,.vt td.num{text-align:right;white-space:nowrap}
+.vt tr.tot td{font-weight:800;border-top:2px solid var(--line)}
+.vt tr.today td:first-child{color:var(--g);font-weight:800}
 body:not(.mode-res) .rv{display:none!important}
 body:not(.mode-prod) .qv{display:none!important}
 body.mode-prod .rv-or-pv{display:none!important}
@@ -315,6 +327,16 @@ td.num.ok{color:var(--g);font-weight:800} td.num.low{color:var(--r);font-weight:
     <div class="kpi" style="--k:var(--p)"><span class="lbl">Oldest (days)</span><span class="big" data-k="oldest">—</span></div>
   </section>
 
+  <section class="panel pv" id="closedsec">
+    <div class="ph">
+      <div class="ico" style="--ic:rgba(52,211,153,.14);--icc:var(--g)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M20 6 9 17l-5-5"/></svg></div>
+      <div><h2 class="h">Closed putaway</h2><p class="note">Jobs closed per day (by job_closed_at). PB = containers (distinct container_barcode). Follows the warehouse, process type, food and search filters. History kept 35 days · updated <b id="cAt">—</b></p></div>
+    </div>
+    <div class="ckpis" id="cKpis"></div>
+    <div class="chart" id="cChart" style="min-height:190px"></div>
+    <div class="tablewrap" style="max-height:460px"><table class="vt" id="cDays"></table></div>
+  </section>
+
   <div class="grid2 pv">
     <section class="panel" id="aging">
       <div class="ph">
@@ -343,7 +365,7 @@ td.num.ok{color:var(--g);font-weight:800} td.num.low{color:var(--r);font-weight:
   <section class="panel pv" id="jobsec">
     <div class="ph">
       <div class="ico" style="--ic:rgba(167,139,250,.16);--icc:var(--p)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="4" y="4" width="16" height="16" rx="3"/><path d="M4 10h16M10 10v10"/></svg></div>
-      <div><h2 class="h">Open putaway jobs</h2></div>
+      <div><h2 class="h" id="jobsTitle">Open putaway jobs</h2></div>
     </div>
     <div class="tablewrap">
       <table id="tbl">
@@ -359,6 +381,7 @@ td.num.ok{color:var(--g);font-weight:800} td.num.low{color:var(--r);font-weight:
           <th class="hide-sm"><button type="button" data-sort="asn">ASN</button></th>
           <th class="hide-sm"><button type="button" data-sort="user">User</button></th>
           <th><button type="button" data-sort="created">Created</button></th>
+          <th><button type="button" data-sort="closedAt">Closed at</button></th>
           <th class="num"><button type="button" data-sort="age">Age (days)</button></th>
         </tr></thead>
         <tbody id="tbody"></tbody>
@@ -520,6 +543,7 @@ const ATTEND_CSV_URL_2 = 'https://docs.google.com/spreadsheets/d/' + ATTEND_SHEE
   const API = SB_URL + '/rest/v1/stocktake_snapshots?id=eq.3&select=';
   let RAW = null, L = [], lastAt = null, updatedLabel = '';
   let RRAW = null, R = [], rAt = null;
+  let C = [], cAt = null;
   const when = (t) => new Date(t).toLocaleString([], { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
   const ts = (s) => String(s || '').replace('T', ' ').slice(0, 19);
 
@@ -537,20 +561,36 @@ const ATTEND_CSV_URL_2 = 'https://docs.google.com/spreadsheets/d/' + ATTEND_SHEE
         created, opened: ts(g(a, 'job_opened_at')), day: created.slice(0, 10), isToday: created.slice(0, 10) === today, age, ab: ageBucket(age) };
     }).filter((l) => l.wh);
   }
+  // ---------- closed putaway (35-day history saved by the Refresh Putaway bookmark) ----------
+  async function loadClosed() {
+    try {
+      const r = await fetch(SB_URL + '/rest/v1/putaway_closed_snapshots?id=eq.1&select=updated_at,batch,parts', { headers: H, cache: 'no-store' }); if (!r.ok) return;
+      const m = (await r.json())[0]; if (!m || !m.batch || m.updated_at === cAt) return;
+      const r2 = await fetch(SB_URL + '/rest/v1/putaway_closed_parts?batch=eq.' + encodeURIComponent(m.batch) + '&select=part,cols,rows&order=part', { headers: H, cache: 'no-store' }); if (!r2.ok) return;
+      const parts = await r2.json(); if (parts.length !== m.parts) return;
+      const t0 = iso(new Date());
+      C = parts.flatMap((pt) => { const ix = Object.fromEntries(pt.cols.map((c, i) => [c, i])); const g = (a, c) => (ix[c] == null ? '' : a[ix[c]] ?? ''); return pt.rows.map((a) => {
+        const created = ts(g(a, 'job_creation_date')), closedAt = ts(g(a, 'job_closed_at')); const cm = Date.parse(created.replace(' ', 'T')), xm = Date.parse(closedAt.replace(' ', 'T'));
+        const leadH = isNaN(cm) || isNaN(xm) ? null : Math.max(0, (xm - cm) / 36e5); const age = leadH == null ? 0 : Math.floor(leadH / 24);
+        return { wh: g(a, 'partner_warehouse_code'), job: g(a, 'job_nr'), cont: g(a, 'container_barcode'), ptype: g(a, 'process_type') || '—', grp: g(a, 'grouping_key'), status: 'closed', rem: 0, done: +g(a, 'items_completed') || 0,
+          food: String(g(a, 'is_food')) === '1' ? 1 : 0, user: String(g(a, 'username')).split('@')[0], asn: g(a, 'asn_nr'), src: '', created, opened: ts(g(a, 'job_opened_at')), closedAt, cday: closedAt.slice(0, 10), day: created.slice(0, 10), isToday: closedAt.slice(0, 10) === t0, age, leadH, ab: ageBucket(age) }; }); }).filter((l) => l.wh && l.cday);
+      cAt = m.updated_at; fillSelects(); render();
+    } catch (e) {}
+  }
   function setLive(state, txt) { const l = $('#live'); l.classList.toggle('err', state === 'err'); l.classList.toggle('busy', state === 'busy'); $('#liveTxt').textContent = txt; }
   async function load(force) {
     setLive('busy', RAW ? 'Checking' : 'Loading');
     try {
       if (RAW && !force) {
         const r = await fetch(API + 'updated_at', { headers: H, cache: 'no-store' });
-        if (r.ok) { const j = await r.json(); if (j[0] && j[0].updated_at === lastAt) { await loadRes(); await loadProdLive(); setLive('ok', 'LIVE'); build(); render(); return; } }
+        if (r.ok) { const j = await r.json(); if (j[0] && j[0].updated_at === lastAt) { await loadRes(); await loadProdLive(); await loadClosed(); setLive('ok', 'LIVE'); build(); render(); return; } }
       }
       const res = await fetch(API + 'updated_at,row_count,cols,rows', { headers: H, cache: 'no-store' });
       if (!res.ok) throw new Error('Supabase answered ' + res.status);
       const j = await res.json();
       if (!j[0]) { RAW = null; setLive('err', 'No data yet'); render('No data yet. Click the Refresh Putaway bookmark on grocery-tools.noon.team.'); return; }
       RAW = j[0]; lastAt = RAW.updated_at; updatedLabel = when(lastAt); $('#loadedAt').textContent = updatedLabel;
-      build(); fillSelects(); await loadRes(); await loadProdLive(); setLive('ok', 'LIVE'); render();
+      build(); fillSelects(); await loadRes(); await loadProdLive(); await loadClosed(); setLive('ok', 'LIVE'); render();
     } catch (e) { setLive('err', 'Load failed'); if (!RAW) render('Could not load the data. ' + e.message); }
   }
   let prodAt = null;
@@ -594,16 +634,55 @@ const ATTEND_CSV_URL_2 = 'https://docs.google.com/spreadsheets/d/' + ATTEND_SHEE
   }
   function fillSelects() {
     const fill = (id, vals, all, key) => { const s = $(id); const cur = st[key]; s.replaceChildren(new Option(all, 'All'), ...vals.map((v) => new Option(v, v))); s.value = vals.includes(cur) ? cur : 'All'; st[key] = s.value; };
-    fill('#status', [...new Set(L.map((l) => l.status))].sort(), 'All statuses', 'status');
-    fill('#ptype', [...new Set(L.map((l) => l.ptype))].sort(), 'All process types', 'ptype');
+    fill('#status', [...new Set([...L.map((l) => l.status), 'closed'])].sort(), 'All open statuses', 'status');
+    fill('#ptype', [...new Set([...L, ...C].map((l) => l.ptype))].sort(), 'All process types', 'ptype');
   }
 
   const inWh = (w) => !st.whs.size || st.whs.has(w);
   const matchQ = (q, ...v) => !q || v.some((x) => String(x || '').toLowerCase().includes(q));
   const baseView = (skip) => {
     const q = st.q.trim().toLowerCase();
-    return L.filter((l) => (skip === 'wh' || inWh(l.wh)) && (!st.from || l.day >= st.from) && (!st.to || l.day <= st.to) && (st.status === 'All' || l.status === st.status) && (skip === 'ptype' || st.ptype === 'All' || l.ptype === st.ptype) && (st.food === 'All' || String(l.food) === st.food) && (skip === 'age' || !st.age || l.ab === st.age) && matchQ(q, l.job, l.cont, l.asn, l.user));
+    const isC = st.status === 'closed'; const src = isC ? C : L; const dk = (l) => (isC ? l.cday : l.day);
+    return src.filter((l) => (skip === 'wh' || inWh(l.wh)) && (!st.from || dk(l) >= st.from) && (!st.to || dk(l) <= st.to) && (isC || st.status === 'All' || l.status === st.status) && (skip === 'ptype' || st.ptype === 'All' || l.ptype === st.ptype) && (st.food === 'All' || String(l.food) === st.food) && (skip === 'age' || !st.age || l.ab === st.age) && matchQ(q, l.job, l.cont, l.asn, l.user));
   };
+  // closed jobs for the Closed putaway panel: warehouse, process type, food and search filters only
+  const closedBase = () => { const q = st.q.trim().toLowerCase(); return C.filter((l) => inWh(l.wh) && (st.ptype === 'All' || l.ptype === st.ptype) && (st.food === 'All' || String(l.food) === st.food) && matchQ(q, l.job, l.cont, l.asn, l.user)); };
+  const cStats = (rs) => ({ jobs: rs.length, qty: d3.sum(rs, (l) => l.done), pb: new Set(rs.map((l) => l.wh + '|' + l.cont)).size, users: new Set(rs.map((l) => l.user).filter(Boolean)).size, lead: rs.length ? d3.mean(rs.filter((l) => l.leadH != null), (l) => l.leadH) : null });
+  function drawClosed() {
+    $('#cAt').textContent = cAt ? when(cAt) : '— (run the Refresh Putaway bookmark)';
+    const base = closedBase(); const t0 = iso(new Date()); const dAgo = (n) => { const d = new Date(); d.setDate(d.getDate() - n); return iso(d); };
+    const mStart = t0.slice(0, 8) + '01';
+    const tile = (title, rs, cls) => { const s = cStats(rs); const b = el('div', 'ctile' + (cls ? ' ' + cls : '')); b.append(el('span', 't', title)); const r3 = el('div', 'row3'); [[F(s.jobs), 'jobs'], [F(s.qty), 'qty'], [F(s.pb), 'containers (PB)']].forEach(([v, l]) => { const c = el('div'); c.append(el('b', '', v), el('span', '', l)); r3.append(c); }); b.append(r3); if (s.lead != null) b.append(el('span', 't', 'Avg created → closed: ' + d3.format('.1f')(s.lead) + ' h · ' + F(s.users) + ' users')); return b; };
+    $('#cKpis').replaceChildren(
+      tile('Closed today · ' + t0, base.filter((l) => l.cday === t0), 'today'),
+      tile('Yesterday · ' + dAgo(1), base.filter((l) => l.cday === dAgo(1))),
+      tile('Last 7 days', base.filter((l) => l.cday >= dAgo(6))),
+      tile('This month (from ' + mStart.slice(5) + ')', base.filter((l) => l.cday >= mStart)));
+    // chart: containers per day, last 30 days
+    const box = $('#cChart'); box.replaceChildren();
+    const days = []; for (let i = 29; i >= 0; i--) days.push(dAgo(i));
+    const by = d3.group(base, (l) => l.cday); const data = days.map((d) => [d, cStats(by.get(d) || [])]);
+    const W = Math.max(300, box.clientWidth), Hh = 190, m = { t: 18, r: 8, b: 26, l: 8 };
+    const x = d3.scaleBand(days, [m.l, W - m.r]).padding(0.18); const y = d3.scaleLinear([0, d3.max(data, (d) => d[1].pb) || 1], [Hh - m.b, m.t]);
+    const svg = d3.select(box).append('svg').attr('width', '100%').attr('viewBox', `0 0 ${W} ${Hh}`).attr('height', Hh).attr('role', 'img').attr('aria-label', 'Containers closed per day');
+    const t = tipFor(box);
+    svg.selectAll('rect').data(data).join('rect').attr('x', (d) => x(d[0])).attr('width', x.bandwidth()).attr('y', (d) => y(d[1].pb)).attr('height', (d) => y(0) - y(d[1].pb)).attr('rx', 3)
+      .style('fill', (d) => (d[0] === t0 ? 'var(--g)' : 'var(--b)')).on('mousemove', (e, d) => showTip(box, t, e, d[0], F(d[1].pb) + ' containers · ' + F(d[1].jobs) + ' jobs · ' + F(d[1].qty) + ' qty')).on('mouseleave', () => { t.hidden = true; });
+    svg.selectAll('text.v').data(data.filter((d) => d[1].pb)).join('text').attr('class', 'v').attr('x', (d) => x(d[0]) + x.bandwidth() / 2).attr('y', (d) => y(d[1].pb) - 4).attr('text-anchor', 'middle').attr('font-size', 10).style('fill', 'var(--muted)').text((d) => (x.bandwidth() > 22 ? d3.format('~s')(d[1].pb) : ''));
+    const step = Math.ceil(30 / Math.max(1, Math.floor(W / 60)));
+    svg.selectAll('text.d').data(days.filter((d, i) => (29 - i) % step === 0)).join('text').attr('class', 'd').attr('x', (d) => x(d) + x.bandwidth() / 2).attr('y', Hh - 8).attr('text-anchor', 'middle').attr('font-size', 10.5).style('fill', 'var(--muted)').text((d) => d.slice(5));
+    // per-day table, newest first, PB per warehouse
+    const whs = st.whs.size ? selList() : WAREHOUSES;
+    const tbl = $('#cDays'); tbl.replaceChildren();
+    const hr = el('tr'); [['Day', ''], ['Jobs', 'num'], ['Qty', 'num'], ['Containers (PB)', 'num'], ['Users', 'num'], ['Avg lead (h)', 'num'], ...whs.map((w) => [w + ' PB', 'num'])].forEach(([h, c]) => hr.append(el('th', c, h)));
+    const th = el('thead'); th.append(hr); const tb = el('tbody');
+    const allDays = [...by.keys()].sort().reverse();
+    if (!allDays.length) { const tr = el('tr'); const td = el('td', '', cAt ? 'No closed jobs for these filters.' : 'No closed data yet. Run the Refresh Putaway bookmark (new version) on grocery-tools.'); td.colSpan = 6 + whs.length; td.style.color = 'var(--muted)'; tr.append(td); tb.append(tr); }
+    const rowOf = (label, rs, cls) => { const s = cStats(rs); const tr = el('tr', cls || ''); tr.append(el('td', 'c-date', label), el('td', 'num', F(s.jobs)), el('td', 'num', F(s.qty)), el('td', 'num', F(s.pb)), el('td', 'num', F(s.users)), el('td', 'num', s.lead != null ? d3.format('.1f')(s.lead) : '—'), ...whs.map((w) => el('td', 'num', F(new Set(rs.filter((l) => l.wh === w).map((l) => l.cont)).size)))); return tr; };
+    allDays.forEach((d) => tb.append(rowOf(d, by.get(d), d === t0 ? 'today' : '')));
+    if (allDays.length > 1) tb.append(rowOf('Total (' + allDays.length + ' days)', base, 'tot'));
+    tbl.append(th, tb);
+  }
   function jobView() {
     const rows = baseView();
     rows.sort((a, b) => { const va = a[st.sortKey], vb = b[st.sortKey]; const c = typeof va === 'number' ? va - vb : String(va).localeCompare(String(vb)); return c * st.sortDir || b.age - a.age; });
@@ -632,10 +711,13 @@ const ATTEND_CSV_URL_2 = 'https://docs.google.com/spreadsheets/d/' + ATTEND_SHEE
     document.querySelectorAll('[data-mode]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.mode === st.mode)));
     if (st.mode === 'res') { drawRes(); drawDr(); return; }
     if (st.mode === 'prod') { drawProd(); drawDr(); return; }
-    drawCards(emptyMsg); drawChips(); drawKpis(); drawAge(); drawTypes(); drawDays(); drawTable(emptyMsg); drawDr();
+    const isC = st.status === 'closed'; document.body.classList.toggle('st-closed', isC);
+    { const lab = document.querySelector('.dr > span'); if (lab) lab.textContent = isC ? 'Closed' : 'Created'; }
+    $('#jobsTitle').textContent = isC ? 'Closed putaway jobs' : 'Open putaway jobs';
+    drawCards(emptyMsg); drawChips(); drawKpis(); drawClosed(); drawAge(); drawTypes(); drawDays(); drawTable(emptyMsg); drawDr();
   }
   function drawCards(emptyMsg) {
-    if (!RAW) { $('#cards').replaceChildren(el('div', 'msg' + (emptyMsg && /Could not/.test(emptyMsg) ? ' err' : ''), emptyMsg || 'Loading…')); return; }
+    if (!RAW && st.status !== 'closed') { $('#cards').replaceChildren(el('div', 'msg' + (emptyMsg && /Could not/.test(emptyMsg) ? ' err' : ''), emptyMsg || 'Loading…')); return; }
     const all = baseView('wh');
     $('#cards').replaceChildren(...WAREHOUSES.map((wh) => {
       const rows = all.filter((l) => l.wh === wh); const k = kpisOf(rows);
@@ -645,15 +727,16 @@ const ATTEND_CSV_URL_2 = 'https://docs.google.com/spreadsheets/d/' + ATTEND_SHEE
       AG.forEach((a) => { const n = d3.sum(rows.filter((l) => l.ab === a.k), (l) => l.rem); const i = el('i'); i.style.width = (100 * n / (k.items || 1)) + '%'; i.style.background = a.c; bar.append(i); });
       const mini = el('div', 'mini');
       const part = (v, label, bad) => { const sp = el('span', bad ? 'bad' : ''); sp.append(el('b', '', F(v)), ' ' + label); return sp; };
+      if (st.status === 'closed') { const s = cStats(rows); mini.append(part(s.pb, 'containers (PB)'), part(s.users, 'users'), part(cStats(rows.filter((l) => l.isToday)).pb, 'PB today')); b.append(top, el('div', 'big', F(s.qty)), el('div', 'lbl', 'Closed qty'), mini); return b; }
       mini.append(part(k.doneQty, 'completed'), part(k.pendingQty, 'pending'), part(k.openedQty, 'opened'), part(k.oldest, 'days oldest', k.oldest > 2));
       b.append(top, el('div', 'big', F(k.items)), el('div', 'lbl', 'Remaining qty'), bar, mini);
       return b;
     }));
   }
   function drawChips() {
-    const all = baseView('wh'); const cnt = d3.rollup(all, (v) => d3.sum(v, (l) => l.rem), (l) => l.wh);
+    const all = baseView('wh'); const val = (l) => (st.status === 'closed' ? l.done : l.rem); const cnt = d3.rollup(all, (v) => d3.sum(v, val), (l) => l.wh);
     const mk = (w, label, n) => { const b = el('button', 'chip', label); b.append(el('span', 'n', F(n))); b.type = 'button'; b.dataset.wh = w; b.setAttribute('aria-pressed', String(w === 'All' ? !st.whs.size : st.whs.has(w))); return b; };
-    $('#chips').replaceChildren(mk('All', 'All warehouses', d3.sum(all, (l) => l.rem)), ...WAREHOUSES.map((w) => mk(w, w, cnt.get(w) || 0)));
+    $('#chips').replaceChildren(mk('All', 'All warehouses', d3.sum(all, val)), ...WAREHOUSES.map((w) => mk(w, w, cnt.get(w) || 0)));
   }
   function drawKpis() { const k = kpisOf(baseView()); document.querySelectorAll('#kpis [data-k]').forEach((e) => { e.textContent = RAW ? F(k[e.dataset.k]) : '—'; }); }
   function drawAge() {
@@ -711,17 +794,17 @@ const ATTEND_CSV_URL_2 = 'https://docs.google.com/spreadsheets/d/' + ATTEND_SHEE
       const tr = el('tr', l.age > 7 ? 'age-r' : l.age > 2 ? 'age-o' : ''); const td = (c, v) => tr.append(el('td', c, v));
       td('c-wh colwh', l.wh); td('c-sku', l.job); td('c-loc hide-sm', l.cont); td('c-fam', l.ptype); td('c-fam', l.status);
       td('num', F(l.rem)); td('num', F(l.done)); td('c-fam hide-sm', l.food ? 'Food' : 'Non-food'); td('c-fam hide-sm', l.asn || '—'); td('c-fam hide-sm', l.user || '—');
-      td('c-date', l.created.slice(0, 16)); td('num age', F(l.age));
+      td('c-date', l.created.slice(0, 16)); td('c-date', l.closedAt ? l.closedAt.slice(0, 16) : '—'); td('num age', F(l.age));
       frag.append(tr);
     });
     $('#tbody').replaceChildren(frag);
-    $('#count').textContent = rows.length ? `Showing ${F(Math.min(lim, rows.length))} of ${F(rows.length)} jobs · ${F(d3.sum(rows, (l) => l.rem))} remaining · ${F(d3.sum(rows, (l) => l.done))} completed` : RAW ? 'No jobs match these filters.' : (emptyMsg ? 'No data yet.' : 'Loading…');
+    $('#count').textContent = rows.length ? `Showing ${F(Math.min(lim, rows.length))} of ${F(rows.length)} jobs · ` + (st.status === 'closed' ? `${F(d3.sum(rows, (l) => l.done))} qty closed · ${F(new Set(rows.map((l) => l.wh + '|' + l.cont)).size)} containers (PB)` : `${F(d3.sum(rows, (l) => l.rem))} remaining · ${F(d3.sum(rows, (l) => l.done))} completed`) : RAW ? 'No jobs match these filters.' : (emptyMsg ? 'No data yet.' : 'Loading…');
     $('#more').hidden = rows.length <= lim;
   }
 
   // exports: selected warehouses, or all when none is selected
   const stamp = () => iso(new Date()) + '_' + new Date().toTimeString().slice(0, 5).replace(':', '');
-  const jobsOut = () => jobView().map((l) => ({ Warehouse: l.wh, Job: l.job, Container: l.cont, 'Process type': l.ptype, 'Grouping key': l.grp, Status: l.status, 'Remaining qty': l.rem, 'Completed qty': l.done, Food: l.food ? 'Food' : 'Non-food', ASN: l.asn, User: l.user, 'Source pack warehouse': l.src, Created: l.created, Opened: l.opened, 'Age (days)': l.age, 'Open for': AGL[l.ab] }));
+  const jobsOut = () => jobView().map((l) => ({ Warehouse: l.wh, Job: l.job, Container: l.cont, 'Process type': l.ptype, 'Grouping key': l.grp, Status: l.status, 'Remaining qty': l.rem, 'Completed qty': l.done, Food: l.food ? 'Food' : 'Non-food', ASN: l.asn, User: l.user, 'Source pack warehouse': l.src, Created: l.created, Opened: l.opened, 'Closed at': l.closedAt || '', 'Created → closed (h)': l.leadH != null ? Math.round(l.leadH * 10) / 10 : '', 'Age (days)': l.age, 'Open for': AGL[l.ab] }));
   function toCSV(rows) { if (!rows.length) return ''; const cols = Object.keys(rows[0]); const esc = (v) => { const s = v == null ? '' : String(v); return /[",\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s; }; return '\uFEFF' + [cols.join(','), ...rows.map((r) => cols.map((c) => esc(r[c])).join(','))].join('\n'); }
   function download(blob, name) { const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = name; document.body.append(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 1000); }
   // ---------- reservations view ----------
@@ -1101,6 +1184,8 @@ const ATTEND_CSV_URL_2 = 'https://docs.google.com/spreadsheets/d/' + ATTEND_SHEE
     add('Warehouses', sum);
     add('Process types', d3.rollups(base, (v) => [v.length, d3.sum(v, (l) => l.rem), d3.sum(v, (l) => l.done)], (l) => l.ptype).sort((a, b) => b[1][1] - a[1][1]).map(([p, [n, it, dn]]) => ({ 'Process type': p, 'Remaining qty': it, 'Completed qty': dn, Jobs: n })));
     const ab = baseView('age'); add('Aging', AG.map((a) => ({ 'Open for': a.l, 'Remaining qty': d3.sum(ab.filter((l) => l.ab === a.k), (l) => l.rem), 'Completed qty': d3.sum(ab.filter((l) => l.ab === a.k), (l) => l.done), Jobs: ab.filter((l) => l.ab === a.k).length })));
+    { const cb = closedBase(); const byd = d3.group(cb, (l) => l.cday); const whs2 = st.whs.size ? selList() : WAREHOUSES;
+      add('Closed per day', [...byd.keys()].sort().reverse().map((d) => { const rs = byd.get(d); const s = cStats(rs); return { Day: d, Jobs: s.jobs, Qty: s.qty, 'Containers (PB)': s.pb, Users: s.users, 'Avg created → closed (h)': s.lead != null ? Math.round(s.lead * 10) / 10 : '', ...Object.fromEntries(whs2.map((w) => [w + ' PB', new Set(rs.filter((l) => l.wh === w).map((l) => l.cont)).size])) }; })); }
     add('Jobs', jobsOut());
     XLSX.writeFile(wb, `Putaway_open_${scopeFile()}_${stamp()}.xlsx`);
   });
@@ -1127,12 +1212,13 @@ const ATTEND_CSV_URL_2 = 'https://docs.google.com/spreadsheets/d/' + ATTEND_SHEE
   $('#rtbl thead').addEventListener('click', (e) => { const b = e.target.closest('button[data-rsort]'); if (!b) return; const k = b.dataset.rsort; if (k === st.rsort) st.rdir = -st.rdir; else { st.rsort = k; st.rdir = ['qty', 'age'].includes(k) ? -1 : 1; } render(); });
   $('#reset').addEventListener('click', () => { st.reason = 'All'; st.rage = null; $('#reason').value = 'All'; st.phour = 'All'; st.pten = 'All'; });
   $('#reset').addEventListener('click', () => { st.whs.clear(); Object.assign(st, { from: '', to: '', status: 'All', ptype: 'All', food: 'All', q: '', age: null, sortKey: 'age', sortDir: -1, shown: 200 }); ['#q', '#dFrom', '#dTo'].forEach((s) => { $(s).value = ''; }); ['#status', '#ptype', '#food'].forEach((s) => { $(s).value = 'All'; }); render(); });
+  setInterval(() => { if (!document.hidden) loadClosed(); }, CHECK_EVERY_SECONDS * 1000);
   $('#more').addEventListener('click', () => { st.shown += 200; drawTable(); });
   $('#tbl thead').addEventListener('click', (e) => { const b = e.target.closest('button[data-sort]'); if (!b) return; const k = b.dataset.sort; if (k === st.sortKey) st.sortDir = -st.sortDir; else { st.sortKey = k; st.sortDir = ['age', 'rem', 'done'].includes(k) ? -1 : 1; } st.shown = 200; drawTable(); });
   $('#refresh').addEventListener('click', () => load(true));
   const setHdr = () => document.documentElement.style.setProperty('--hdr', $('#hdr').offsetHeight + 'px');
   setHdr();
-  let rt; window.addEventListener('resize', () => { clearTimeout(rt); rt = setTimeout(() => { setHdr(); if (RAW) { drawTypes(); drawDays(); } }, 150); });
+  let rt; window.addEventListener('resize', () => { clearTimeout(rt); rt = setTimeout(() => { setHdr(); if (RAW) { drawTypes(); drawDays(); drawClosed(); } }, 150); });
   load(true);
   loadNames(); setInterval(() => { if (!document.hidden) loadNames(); }, 30 * 60000);
   setInterval(() => { if (!document.hidden) load(false); }, CHECK_EVERY_SECONDS * 1000);
